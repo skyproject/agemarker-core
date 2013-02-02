@@ -11,7 +11,7 @@ namespace AgemarkerCore
         public event EventHandler<Events.CalculationsCompletedEventArgs> CalculationsCompletedEvent;
         private ManualResetEvent busyEvent = new ManualResetEvent(false);
         private BackgroundWorker worker = new BackgroundWorker();
-        private Random random;
+        private RandomInt64 random;
         private double[] ElementsContent = new double[118];
         private double[] ElementsNewContent = new double[118];
         private double[] ElementsWeight = new double[118];
@@ -20,10 +20,10 @@ namespace AgemarkerCore
         private double[] OxidesPureElement = new double[53];
         private double[] OxidesWeightSum = new double[53];
         private double[] AtomNor = new double[118];
-        private int[] AtomAll = new int[118];
-        private int[] AtomAllEight = new int[118];
-        private int AtomAllSum = new int();
-        private int AtomAllEightSum = new int();
+        private long[] AtomAll = new long[118];
+        private long[] AtomAllEight = new long[118];
+        private long AtomAllSum = new long();
+        private long AtomAllEightSum = new long();
         private int AtomMultiplier = new int();
         private double[] OutputIab = new double[0];
         private int[] OutputIabCount = new int[0];
@@ -36,7 +36,7 @@ namespace AgemarkerCore
             OxidesContent = oxidesContent;
             ElementsContent = elementsContent;
             ElementsWeight = elementsWeight;
-            random = new Random(BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 4));
+            random = new RandomInt64(new Random((BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 4))));
             worker.DoWork += calculateIp;
             worker.RunWorkerCompleted += calculateResults;
         }
@@ -48,7 +48,7 @@ namespace AgemarkerCore
             OxidesContent = oxidesContent;
             ElementsContent = elementsContent;
             ElementsWeight = elementsWeight;
-            random = new Random(randomSeed);
+            random = new RandomInt64(new Random(randomSeed));
             worker.DoWork += calculateIp;
             worker.RunWorkerCompleted += calculateResults;
         }
@@ -273,10 +273,10 @@ namespace AgemarkerCore
         {
             calculateAtoms();
             double[] input = new double[9];
-            int[] count = new int[118];
+            long[] count = new long[118];
             double iab;
-            int r, rr;
-            for (int x = 0; x < AtomAllSum; x++)
+            long r, rr;
+            for (long x = 0; x < AtomAllSum; x++)
             {
                 busyEvent.WaitOne();
                 iab = 0;
@@ -362,8 +362,8 @@ namespace AgemarkerCore
             double[] outputIabIntervalsCenters = new double[7];
             double[,] outputIabIntervalsSqrt = new double[7, 2];
             double[] outputIabIntervalsCentersSqrt = new double[7];
-            int[] outputIabIntervalsCount = new int[7];
-            int[] outputIabIntervalsCountSqrt = new int[7];
+            long[] outputIabIntervalsCount = new long[7];
+            long[] outputIabIntervalsCountSqrt = new long[7];
             Array.Sort(OutputIab, OutputIabCount);
             for (int x = 0; x < iabCount; x++)
             {

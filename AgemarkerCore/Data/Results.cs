@@ -8,8 +8,8 @@ namespace AgemarkerCore.Data
         public double[] ElementsContent { get; set; }
         public double[] ElementsWeight { get; set; }
         public double[] OxidesContent { get; set; }    
-        public int[] Atoms { get; set; }
-        public int AtomsSum { get; set; }
+        public long[] Atoms { get; set; }
+        public long AtomsSum { get; set; }
         public int Multiplier { get; set; }
         public double[] Ip { get; set; }
         public double[] IpSqrt { get; set; }
@@ -30,7 +30,7 @@ namespace AgemarkerCore.Data
         public double[] IpSqrtIntervalMaximum { get; set; }
         public double[] IpIntervalCenter { get; set; }
         public double[] IpSqrtIntervalCenter { get; set; }
-        public int[] IpIntervalCount { get; set; }
-        public int[] IpSqrtIntervalCount { get; set; }
+        public long[] IpIntervalCount { get; set; }
+        public long[] IpSqrtIntervalCount { get; set; }
     }
 }
