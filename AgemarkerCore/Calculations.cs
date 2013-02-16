@@ -3,51 +3,54 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace AgemarkerCore
 {
     public class Calculations
     {
         public event EventHandler<Events.CalculationsCompletedEventArgs> CalculationsCompletedEvent;
-        private ManualResetEvent busyEvent = new ManualResetEvent(false);
-        private BackgroundWorker worker = new BackgroundWorker();
-        private RandomInt64 random;
-        private double[] ElementsContent = new double[118];
-        private double[] ElementsNewContent = new double[118];
-        private double[] ElementsWeight = new double[118];
-        private double[] OxidesContent = new double[53];
-        private double[] OxidesOxygen = new double[53];
-        private double[] OxidesPureElement = new double[53];
-        private double[] OxidesWeightSum = new double[53];
-        private double[] AtomNor = new double[118];
-        private long[] AtomAll = new long[118];
-        private long[] AtomAllEight = new long[118];
-        private long AtomAllSum = new long();
-        private long AtomAllEightSum = new long();
-        private int AtomMultiplier = new int();
-        private double[] OutputIab = new double[0];
-        private int[] OutputIabCount = new int[0];
-        private Logarithm LogBase = new Logarithm();
+        ManualResetEvent busyEvent = new ManualResetEvent(false);
+        BackgroundWorker worker = new BackgroundWorker();
+        RandomInt64 random;
+        double[] ElementsContent = new double[118];
+        double[] ElementsNewContent = new double[118];
+        double[] ElementsWeight = new double[118];
+        double[] OxidesContent = new double[53];
+        double[] OxidesOxygen = new double[53];
+        double[] OxidesPureElement = new double[53];
+        double[] OxidesWeightSum = new double[53];
+        double[] AtomNor = new double[118];
+        long[] AtomAll = new long[118];
+        long[] AtomAllEight = new long[118];
+        long AtomAllSum = new long();
+        long AtomAllEightSum = new long();
+        int AtomMultiplier = new int();
+        int IntervalsCount = new int();
+        Logarithm LogBase = new Logarithm();
+        SortedDictionary<double, int> OutputIab = new SortedDictionary<double, int>();
 
-        public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, int multiplier, Logarithm log)
+        public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, int multiplier, int intervalsCount, Logarithm log)
         {
             LogBase = log;
             AtomMultiplier = multiplier;
             OxidesContent = oxidesContent;
             ElementsContent = elementsContent;
             ElementsWeight = elementsWeight;
+            IntervalsCount = intervalsCount;
             random = new RandomInt64(new Random((BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 4))));
             worker.DoWork += calculateIp;
             worker.RunWorkerCompleted += calculateResults;
         }
 
-        public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, int multiplier, Logarithm log, int randomSeed)
+        public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, int multiplier, int intervalsCount, Logarithm log, int randomSeed)
         {
             LogBase = log;
             AtomMultiplier = multiplier;
             OxidesContent = oxidesContent;
             ElementsContent = elementsContent;
             ElementsWeight = elementsWeight;
+            IntervalsCount = intervalsCount;
             random = new RandomInt64(new Random(randomSeed));
             worker.DoWork += calculateIp;
             worker.RunWorkerCompleted += calculateResults;
@@ -321,23 +324,13 @@ namespace AgemarkerCore
                     iab = Mathematics.Iab10(input);
                 }
                 iab = Math.Round(iab, 10);
-                bool inputNew = true;
-                int outputIabLength = OutputIab.Length;
-                for (int v = 0; v < outputIabLength; v++)
+                if (OutputIab.ContainsKey(iab))
                 {
-                    if (OutputIab[v] == iab)
-                    {
-                        inputNew = false;
-                        OutputIabCount[v]++;
-                        break;
-                    }
+                    OutputIab[iab]++;
                 }
-                if (inputNew == true)
+                else
                 {
-                    Array.Resize(ref OutputIab, (OutputIab.Length + 1));
-                    Array.Resize(ref OutputIabCount, (OutputIabCount.Length + 1));
-                    OutputIab[(OutputIab.Length - 1)] = iab;
-                    OutputIabCount[(OutputIabCount.Length - 1)]++;
+                    OutputIab[iab] = 1;
                 }
             }
         }
@@ -345,7 +338,9 @@ namespace AgemarkerCore
         private void calculateResults(object sender, RunWorkerCompletedEventArgs e)
         {
             int iabCount = OutputIab.Count();
-            double[] OutputIabSqrt = new double[iabCount];
+            double[] Iab = new double[iabCount];
+            double[] IabSqrt = new double[iabCount];
+            int[] IabCount = new int[iabCount];
             double outputIabSum = 0;
             double outputIabSqrtSum = 0;
             double outputIabAvg = 0;
@@ -358,25 +353,29 @@ namespace AgemarkerCore
             double outputIabIntervalLength = 0;
             double outputIabRangeSqrt = 0;
             double outputIabIntervalLengthSqrt = 0;
-            double[,] outputIabIntervals = new double[7, 2];
-            double[] outputIabIntervalsCenters = new double[7];
-            double[,] outputIabIntervalsSqrt = new double[7, 2];
-            double[] outputIabIntervalsCentersSqrt = new double[7];
-            long[] outputIabIntervalsCount = new long[7];
-            long[] outputIabIntervalsCountSqrt = new long[7];
-            Array.Sort(OutputIab, OutputIabCount);
-            for (int x = 0; x < iabCount; x++)
+            double[,] outputIabIntervals = new double[IntervalsCount, 2];
+            double[] outputIabIntervalsCenters = new double[IntervalsCount];
+            double[,] outputIabIntervalsSqrt = new double[IntervalsCount, 2];
+            double[] outputIabIntervalsCentersSqrt = new double[IntervalsCount];
+            long[] outputIabIntervalsCount = new long[IntervalsCount];
+            long[] outputIabIntervalsCountSqrt = new long[IntervalsCount];
+            int i = 0;
+            foreach (KeyValuePair<double, int> kvp in OutputIab)
             {
-                OutputIabSqrt[x] = Math.Sqrt(OutputIab[x]);
+                Iab[i] = kvp.Key;
+                IabSqrt[i] = Math.Sqrt(kvp.Key);
+                IabCount[i] = kvp.Value;                
+                i++;
             }
+            OutputIab.Clear();
             try
             {
                 for (int x = 0; x < iabCount; x++)
                 {
-                    outputIabSum += ((OutputIab[x] * OutputIabCount[x]));
-                    outputIabSqrtSum += (OutputIabSqrt[x] * OutputIabCount[x]);
-                    outputVariance += (Math.Pow((OutputIabSqrt[x] - outputIabSqrtAvg), 2) * OutputIabCount[x]);
-                    outputVarianceIab += (Math.Pow((OutputIab[x] - outputIabAvg), 2) * OutputIabCount[x]);
+                    outputIabSum += ((Iab[x] * IabCount[x]));
+                    outputIabSqrtSum += (IabSqrt[x] * IabCount[x]);
+                    outputVariance += (Math.Pow((IabSqrt[x] - outputIabSqrtAvg), 2) * IabCount[x]);
+                    outputVarianceIab += (Math.Pow((Iab[x] - outputIabAvg), 2) * IabCount[x]);
                 }
                 outputIabAvg = (outputIabSum / AtomAllSum);
                 outputIabSqrtAvg = (outputIabSqrtSum / AtomAllSum);
@@ -384,34 +383,34 @@ namespace AgemarkerCore
                 outputVarianceIab = (outputVarianceIab / (AtomAllSum - 1));
                 outputVarianceSqrt = Math.Sqrt(outputVariance);
                 outputVarianceIabSqrt = Math.Sqrt(outputVarianceIab);
-                outputIabRange = (OutputIab[(iabCount - 1)] - OutputIab[0]);
-                outputIabIntervalLength = (outputIabRange / 7);
-                outputIabRangeSqrt = (Math.Sqrt(OutputIab[(iabCount - 1)]) - Math.Sqrt(OutputIab[0]));
-                outputIabIntervalLengthSqrt = (outputIabRangeSqrt / 7);
-                for (int x = 0; x < 7; x++)
+                outputIabRange = (Iab[(iabCount - 1)] - Iab[0]);
+                outputIabIntervalLength = (outputIabRange / IntervalsCount);
+                outputIabRangeSqrt = (Math.Sqrt(Iab[(iabCount - 1)]) - Math.Sqrt(Iab[0]));
+                outputIabIntervalLengthSqrt = (outputIabRangeSqrt / IntervalsCount);
+                for (int x = 0; x < IntervalsCount; x++)
                 {
-                    outputIabIntervals[x, 0] = (OutputIab[0] + (outputIabIntervalLength * x));
-                    outputIabIntervals[x, 1] = (OutputIab[0] + (outputIabIntervalLength * (x + 1)));
+                    outputIabIntervals[x, 0] = (Iab[0] + (outputIabIntervalLength * x));
+                    outputIabIntervals[x, 1] = (Iab[0] + (outputIabIntervalLength * (x + 1)));
                     outputIabIntervalsCenters[x] = ((outputIabIntervals[x, 0] + outputIabIntervals[x, 1]) / 2);
-                    outputIabIntervalsSqrt[x, 0] = (Math.Sqrt(OutputIab[0]) + (outputIabIntervalLengthSqrt * x));
-                    outputIabIntervalsSqrt[x, 1] = (Math.Sqrt(OutputIab[0]) + (outputIabIntervalLengthSqrt * (x + 1)));
+                    outputIabIntervalsSqrt[x, 0] = (Math.Sqrt(Iab[0]) + (outputIabIntervalLengthSqrt * x));
+                    outputIabIntervalsSqrt[x, 1] = (Math.Sqrt(Iab[0]) + (outputIabIntervalLengthSqrt * (x + 1)));
                     outputIabIntervalsCentersSqrt[x] = ((outputIabIntervalsSqrt[x, 0] + outputIabIntervalsSqrt[x, 1]) / 2);
                 }
                 for (int x = 0; x < iabCount; x++)
                 {
-                    for (int y = 0; y < 7; y++)
+                    for (int y = 0; y < IntervalsCount; y++)
                     {
-                        if (OutputIab[x] <= outputIabIntervals[y, 1])
+                        if (Iab[x] <= outputIabIntervals[y, 1])
                         {
-                            outputIabIntervalsCount[y] += OutputIabCount[x];
+                            outputIabIntervalsCount[y] += IabCount[x];
                             break;
                         }
                     }
-                    for (int y = 0; y < 7; y++)
+                    for (int y = 0; y < IntervalsCount; y++)
                     {
-                        if (OutputIabSqrt[x] <= outputIabIntervalsSqrt[y, 1])
+                        if (IabSqrt[x] <= outputIabIntervalsSqrt[y, 1])
                         {
-                            outputIabIntervalsCountSqrt[y] += OutputIabCount[x];
+                            outputIabIntervalsCountSqrt[y] += IabCount[x];
                             break;
                         }
                     }
@@ -425,27 +424,28 @@ namespace AgemarkerCore
             r.ElementsWeight = ElementsWeight;
             r.ElementsContent = ElementsContent;
             r.Multiplier = AtomMultiplier;
+            r.IntervalsCount = IntervalsCount;
             r.Logarithm = LogBase;
             r.Atoms = AtomAllEight;
             r.AtomsSum = AtomAllEightSum;
-            r.Ip = OutputIab;
-            r.IpSqrt = OutputIabSqrt;
-            r.IpCount = OutputIabCount;
+            r.Ip = Iab;
+            r.IpSqrt = IabSqrt;
+            r.IpCount = IabCount;
             r.IpAverage = outputIabAvg;
             r.IpVariance = outputVarianceIab;
-            r.IpStandartDeviation = outputVarianceIabSqrt;
+            r.IpStandardDeviation = outputVarianceIabSqrt;
             r.IpSqrtAverage = outputIabSqrtAvg;
             r.IpSqrtVariance = outputVariance;
-            r.IpSqrtStandartDeviation = outputVarianceSqrt;
+            r.IpSqrtStandardDeviation = outputVarianceSqrt;
             r.IpRange = outputIabRange;
             r.IpSqrtRange = outputIabRangeSqrt;
             r.IpIntervalLength = outputIabIntervalLength;
             r.IpSqrtIntervalLength = outputIabIntervalLengthSqrt;
-            r.IpIntervalMinimum = new double[7];
-            r.IpIntervalMaximum = new double[7];
-            r.IpSqrtIntervalMinimum = new double[7];
-            r.IpSqrtIntervalMaximum = new double[7];
-            for (int x = 0; x < 7; x++)
+            r.IpIntervalMinimum = new double[IntervalsCount];
+            r.IpIntervalMaximum = new double[IntervalsCount];
+            r.IpSqrtIntervalMinimum = new double[IntervalsCount];
+            r.IpSqrtIntervalMaximum = new double[IntervalsCount];
+            for (int x = 0; x < IntervalsCount; x++)
             {
                 r.IpIntervalMinimum[x] = outputIabIntervals[x, 0];
                 r.IpIntervalMaximum[x] = outputIabIntervals[x, 1];
@@ -456,14 +456,9 @@ namespace AgemarkerCore
             r.IpIntervalCount = outputIabIntervalsCount;
             r.IpSqrtIntervalCenter = outputIabIntervalsCentersSqrt;
             r.IpSqrtIntervalCount = outputIabIntervalsCountSqrt;
-            raiseCalculationsCompletedEvent(r);
-        }
-
-        protected virtual void raiseCalculationsCompletedEvent(Results results)
-        {
             if (CalculationsCompletedEvent != null)
             {
-                CalculationsCompletedEvent(this, new Events.CalculationsCompletedEventArgs(results));
+                CalculationsCompletedEvent(this, new Events.CalculationsCompletedEventArgs(r));
             }
         }
     }

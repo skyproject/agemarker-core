@@ -11,6 +11,7 @@ namespace AgemarkerCore.Data
         public long[] Atoms { get; set; }
         public long AtomsSum { get; set; }
         public int Multiplier { get; set; }
+        public int IntervalsCount { get; set; }
         public double[] Ip { get; set; }
         public double[] IpSqrt { get; set; }
         public int[] IpCount { get; set; }
@@ -18,8 +19,8 @@ namespace AgemarkerCore.Data
         public double IpSqrtAverage { get; set; }
         public double IpVariance { get; set; }
         public double IpSqrtVariance { get; set; }
-        public double IpStandartDeviation { get; set; }
-        public double IpSqrtStandartDeviation { get; set; }
+        public double IpStandardDeviation { get; set; }
+        public double IpSqrtStandardDeviation { get; set; }
         public double IpRange { get; set; }
         public double IpSqrtRange { get; set; }
         public double IpIntervalLength { get; set; }
