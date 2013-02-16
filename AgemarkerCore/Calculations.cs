@@ -26,31 +26,31 @@ namespace AgemarkerCore
         long AtomAllSum = new long();
         long AtomAllEightSum = new long();
         int AtomMultiplier = new int();
-        int IntervalsCount = new int();
+        int IntervalsNumber = new int();
         Logarithm LogBase = new Logarithm();
         SortedDictionary<double, int> OutputIab = new SortedDictionary<double, int>();
 
-        public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, int multiplier, int intervalsCount, Logarithm log)
+        public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, int multiplier, int intervalsNumber, Logarithm log)
         {
             LogBase = log;
             AtomMultiplier = multiplier;
             OxidesContent = oxidesContent;
             ElementsContent = elementsContent;
             ElementsWeight = elementsWeight;
-            IntervalsCount = intervalsCount;
+            IntervalsNumber = intervalsNumber;
             random = new RandomInt64(new Random((BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 4))));
             worker.DoWork += calculateIp;
             worker.RunWorkerCompleted += calculateResults;
         }
 
-        public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, int multiplier, int intervalsCount, Logarithm log, int randomSeed)
+        public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, int multiplier, int intervalsNumber, Logarithm log, int randomSeed)
         {
             LogBase = log;
             AtomMultiplier = multiplier;
             OxidesContent = oxidesContent;
             ElementsContent = elementsContent;
             ElementsWeight = elementsWeight;
-            IntervalsCount = intervalsCount;
+            IntervalsNumber = intervalsNumber;
             random = new RandomInt64(new Random(randomSeed));
             worker.DoWork += calculateIp;
             worker.RunWorkerCompleted += calculateResults;
@@ -353,12 +353,12 @@ namespace AgemarkerCore
             double outputIabIntervalLength = 0;
             double outputIabRangeSqrt = 0;
             double outputIabIntervalLengthSqrt = 0;
-            double[,] outputIabIntervals = new double[IntervalsCount, 2];
-            double[] outputIabIntervalsCenters = new double[IntervalsCount];
-            double[,] outputIabIntervalsSqrt = new double[IntervalsCount, 2];
-            double[] outputIabIntervalsCentersSqrt = new double[IntervalsCount];
-            long[] outputIabIntervalsCount = new long[IntervalsCount];
-            long[] outputIabIntervalsCountSqrt = new long[IntervalsCount];
+            double[,] outputIabIntervals = new double[IntervalsNumber, 2];
+            double[] outputIabIntervalsCenters = new double[IntervalsNumber];
+            double[,] outputIabIntervalsSqrt = new double[IntervalsNumber, 2];
+            double[] outputIabIntervalsCentersSqrt = new double[IntervalsNumber];
+            long[] outputIabIntervalsCount = new long[IntervalsNumber];
+            long[] outputIabIntervalsCountSqrt = new long[IntervalsNumber];
             int i = 0;
             foreach (KeyValuePair<double, int> kvp in OutputIab)
             {
@@ -384,10 +384,10 @@ namespace AgemarkerCore
                 outputVarianceSqrt = Math.Sqrt(outputVariance);
                 outputVarianceIabSqrt = Math.Sqrt(outputVarianceIab);
                 outputIabRange = (Iab[(iabCount - 1)] - Iab[0]);
-                outputIabIntervalLength = (outputIabRange / IntervalsCount);
+                outputIabIntervalLength = (outputIabRange / IntervalsNumber);
                 outputIabRangeSqrt = (Math.Sqrt(Iab[(iabCount - 1)]) - Math.Sqrt(Iab[0]));
-                outputIabIntervalLengthSqrt = (outputIabRangeSqrt / IntervalsCount);
-                for (int x = 0; x < IntervalsCount; x++)
+                outputIabIntervalLengthSqrt = (outputIabRangeSqrt / IntervalsNumber);
+                for (int x = 0; x < IntervalsNumber; x++)
                 {
                     outputIabIntervals[x, 0] = (Iab[0] + (outputIabIntervalLength * x));
                     outputIabIntervals[x, 1] = (Iab[0] + (outputIabIntervalLength * (x + 1)));
@@ -398,7 +398,7 @@ namespace AgemarkerCore
                 }
                 for (int x = 0; x < iabCount; x++)
                 {
-                    for (int y = 0; y < IntervalsCount; y++)
+                    for (int y = 0; y < IntervalsNumber; y++)
                     {
                         if (Iab[x] <= outputIabIntervals[y, 1])
                         {
@@ -406,7 +406,7 @@ namespace AgemarkerCore
                             break;
                         }
                     }
-                    for (int y = 0; y < IntervalsCount; y++)
+                    for (int y = 0; y < IntervalsNumber; y++)
                     {
                         if (IabSqrt[x] <= outputIabIntervalsSqrt[y, 1])
                         {
@@ -424,7 +424,7 @@ namespace AgemarkerCore
             r.ElementsWeight = ElementsWeight;
             r.ElementsContent = ElementsContent;
             r.Multiplier = AtomMultiplier;
-            r.IntervalsCount = IntervalsCount;
+            r.IntervalsNumber = IntervalsNumber;
             r.Logarithm = LogBase;
             r.Atoms = AtomAllEight;
             r.AtomsSum = AtomAllEightSum;
@@ -441,11 +441,11 @@ namespace AgemarkerCore
             r.IpSqrtRange = outputIabRangeSqrt;
             r.IpIntervalLength = outputIabIntervalLength;
             r.IpSqrtIntervalLength = outputIabIntervalLengthSqrt;
-            r.IpIntervalMinimum = new double[IntervalsCount];
-            r.IpIntervalMaximum = new double[IntervalsCount];
-            r.IpSqrtIntervalMinimum = new double[IntervalsCount];
-            r.IpSqrtIntervalMaximum = new double[IntervalsCount];
-            for (int x = 0; x < IntervalsCount; x++)
+            r.IpIntervalMinimum = new double[IntervalsNumber];
+            r.IpIntervalMaximum = new double[IntervalsNumber];
+            r.IpSqrtIntervalMinimum = new double[IntervalsNumber];
+            r.IpSqrtIntervalMaximum = new double[IntervalsNumber];
+            for (int x = 0; x < IntervalsNumber; x++)
             {
                 r.IpIntervalMinimum[x] = outputIabIntervals[x, 0];
                 r.IpIntervalMaximum[x] = outputIabIntervals[x, 1];
