@@ -10,9 +10,7 @@ namespace AgemarkerCore
     public class Calculations
     {
         public event EventHandler<Events.CalculationsCompletedEventArgs> CalculationsCompletedEvent;
-        ManualResetEvent busyEvent = new ManualResetEvent(false);
-        BackgroundWorker worker = new BackgroundWorker();
-        RandomInt64 random;
+        SortedDictionary<double, int> OutputIab = new SortedDictionary<double, int>();
         double[] ElementsContent = new double[118];
         double[] ElementsNewContent = new double[118];
         double[] ElementsWeight = new double[118];
@@ -28,7 +26,8 @@ namespace AgemarkerCore
         int AtomMultiplier = new int();
         int IntervalsNumber = new int();
         Logarithm LogBase = new Logarithm();
-        SortedDictionary<double, int> OutputIab = new SortedDictionary<double, int>();
+        Core.CalculationsThread[] workers;
+        int runningThreads = 1;
 
         public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, int multiplier, int intervalsNumber, Logarithm log)
         {
@@ -38,12 +37,13 @@ namespace AgemarkerCore
             ElementsContent = elementsContent;
             ElementsWeight = elementsWeight;
             IntervalsNumber = intervalsNumber;
-            random = new RandomInt64(new Random((BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 4))));
-            worker.DoWork += calculateIp;
-            worker.RunWorkerCompleted += calculateResults;
+            workers = new Core.CalculationsThread[1];
+            CalculateAtoms();
+            workers[0] = new Core.CalculationsThread(ElementsWeight, AtomAllEight, AtomAllEightSum, LogBase, 0, AtomAllSum);
+            workers[0].ThreadCalculationsCompletedEvent += ThreadFinished;
         }
 
-        public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, int multiplier, int intervalsNumber, Logarithm log, int randomSeed)
+        public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, int multiplier, int intervalsNumber, Logarithm log, int coresNumber)
         {
             LogBase = log;
             AtomMultiplier = multiplier;
@@ -51,26 +51,45 @@ namespace AgemarkerCore
             ElementsContent = elementsContent;
             ElementsWeight = elementsWeight;
             IntervalsNumber = intervalsNumber;
-            random = new RandomInt64(new Random(randomSeed));
-            worker.DoWork += calculateIp;
-            worker.RunWorkerCompleted += calculateResults;
+            runningThreads = coresNumber;
+            workers = new Core.CalculationsThread[coresNumber];
+            CalculateAtoms();
+            double lenth = AtomAllSum / coresNumber;
+            long threadIterationsLength = long.Parse((Math.Round(lenth)).ToString());
+            for (int x = 0; x < coresNumber; x++)
+            {
+                long start = threadIterationsLength * x;
+                long end = 0;
+                if ((x + 1) == coresNumber)
+                {
+                    end = AtomAllSum;
+                }
+                else
+                {
+                    end = threadIterationsLength * (x + 1);
+                }
+                workers[x] = new Core.CalculationsThread(ElementsWeight, AtomAllEight, AtomAllEightSum, LogBase, start, end);
+                workers[x].ThreadCalculationsCompletedEvent += ThreadFinished;
+            }
         }
 
         public void Start()
         {
-            busyEvent.Set();
-            if (!worker.IsBusy)
+            foreach (Core.CalculationsThread worker in workers)
             {
-                worker.RunWorkerAsync();
+                worker.Start();
             }
         }
 
         public void Pause()
-        {
-            busyEvent.Reset();
+        {            
+            foreach (Core.CalculationsThread worker in workers)
+            {
+                worker.Pause();
+            }
         }
 
-        private void calculateAtoms()
+        private void CalculateAtoms()
         {
             OxidesWeightSum[0] = ((ElementsWeight[13] * 1) + (ElementsWeight[7] * 2));
             OxidesWeightSum[1] = ((ElementsWeight[21] * 1) + (ElementsWeight[7] * 2));
@@ -250,13 +269,7 @@ namespace AgemarkerCore
             for (int x = 0; x < 118; x++)
             {
                 string s = Math.Round((AtomNor[x] * AtomMultiplier), 0).ToString();
-                try
-                {
-                    AtomAll[x] = int.Parse(s);
-                }
-                catch
-                {
-                }
+                long.TryParse(s, out AtomAll[x]);
             }
             for (int x = 0; x < 118; x++)
             {
@@ -272,70 +285,27 @@ namespace AgemarkerCore
             }
         }
 
-        private void calculateIp(object sender, DoWorkEventArgs e)
+        private void ThreadFinished(object sender, Events.ThreadCalculationsCompletedEventArgs e)
         {
-            calculateAtoms();
-            double[] input = new double[9];
-            long[] count = new long[118];
-            double iab;
-            long r, rr;
-            for (long x = 0; x < AtomAllSum; x++)
+            foreach (KeyValuePair<double, int> kvp in e.Ip)
             {
-                busyEvent.WaitOne();
-                iab = 0;
-                for (int ww = 0; ww < 9; ww++)
+                if (OutputIab.ContainsKey(kvp.Key))
                 {
-                    input[ww] = 0;
-                }
-                for (int y = 0; y < 8; y++)
-                {
-                    if (input[y] == 0)
-                    {
-                        do
-                        {
-                            r = random.Next(1, (AtomAllEightSum));
-                            rr = 0;
-                            for (int z = 0; z < 118; z++)
-                            {
-                                if (AtomAllEight[z] != 0)
-                                {
-                                    rr += AtomAllEight[z];
-                                    if (r <= rr && count[z] < AtomAllEight[z])
-                                    {
-                                        input[y] = ElementsWeight[z];
-                                        count[z]++;
-                                        break;
-                                    }
-                                }
-                            }
-                        } while (input[y] == 0);
-                    }
-                }
-                for (int w = 0; w < 8; w++)
-                {
-                    input[8] += input[w];
-                }
-                if (LogBase == Logarithm.Natural)
-                {
-                    iab = Mathematics.Iab(input);
+                    OutputIab[kvp.Key] += kvp.Value;
                 }
                 else
                 {
-                    iab = Mathematics.Iab10(input);
+                    OutputIab[kvp.Key] = kvp.Value;
                 }
-                iab = Math.Round(iab, 10);
-                if (OutputIab.ContainsKey(iab))
-                {
-                    OutputIab[iab]++;
-                }
-                else
-                {
-                    OutputIab[iab] = 1;
-                }
+            }
+            runningThreads--;
+            if (runningThreads == 0)
+            {
+                CalculateResults();
             }
         }
 
-        private void calculateResults(object sender, RunWorkerCompletedEventArgs e)
+        private void CalculateResults()
         {
             int iabCount = OutputIab.Count();
             double[] Iab = new double[iabCount];

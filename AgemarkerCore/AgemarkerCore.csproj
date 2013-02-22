@@ -41,7 +41,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Calculations.cs" />
+    <Compile Include="Core\CalculationThread.cs" />
     <Compile Include="Events\CalculationsCompletedEventArgs.cs" />
+    <Compile Include="Events\ThreadCalculationsCompletedEventArgs.cs" />
     <Compile Include="Mathematics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Data\Logarithm.cs" />
