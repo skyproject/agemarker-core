@@ -10,7 +10,7 @@ namespace AgemarkerCore.Data
         public double[] OxidesContent { get; set; }    
         public long[] Atoms { get; set; }
         public long AtomsSum { get; set; }
-        public int Multiplier { get; set; }
+        public long Multiplier { get; set; }
         public int IntervalsNumber { get; set; }
         public double[] Ip { get; set; }
         public double[] IpSqrt { get; set; }

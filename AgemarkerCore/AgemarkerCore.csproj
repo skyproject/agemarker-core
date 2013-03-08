@@ -41,7 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Calculations.cs" />
-    <Compile Include="Core\CalculationThread.cs" />
+    <Compile Include="Core\CalculationsThread.cs" />
     <Compile Include="Events\CalculationsCompletedEventArgs.cs" />
     <Compile Include="Events\ThreadCalculationsCompletedEventArgs.cs" />
     <Compile Include="Mathematics.cs" />

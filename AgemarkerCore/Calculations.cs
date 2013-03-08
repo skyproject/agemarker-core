@@ -23,13 +23,13 @@ namespace AgemarkerCore
         long[] AtomAllEight = new long[118];
         long AtomAllSum = new long();
         long AtomAllEightSum = new long();
-        int AtomMultiplier = new int();
+        long AtomMultiplier = new long();
         int IntervalsNumber = new int();
         Logarithm LogBase = new Logarithm();
         Core.CalculationsThread[] workers;
         int runningThreads = 1;
 
-        public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, int multiplier, int intervalsNumber, Logarithm log)
+        public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, long multiplier, int intervalsNumber, Logarithm log)
         {
             LogBase = log;
             AtomMultiplier = multiplier;
@@ -43,7 +43,7 @@ namespace AgemarkerCore
             workers[0].ThreadCalculationsCompletedEvent += ThreadFinished;
         }
 
-        public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, int multiplier, int intervalsNumber, Logarithm log, int coresNumber)
+        public Calculations(double[] oxidesContent, double[] elementsContent, double[] elementsWeight, long multiplier, int intervalsNumber, Logarithm log, int coresNumber)
         {
             LogBase = log;
             AtomMultiplier = multiplier;
