@@ -344,11 +344,14 @@ namespace AgemarkerCore
                 {
                     outputIabSum += ((Iab[x] * IabCount[x]));
                     outputIabSqrtSum += (IabSqrt[x] * IabCount[x]);
-                    outputVariance += (Math.Pow((IabSqrt[x] - outputIabSqrtAvg), 2) * IabCount[x]);
-                    outputVarianceIab += (Math.Pow((Iab[x] - outputIabAvg), 2) * IabCount[x]);
                 }
                 outputIabAvg = (outputIabSum / AtomAllSum);
                 outputIabSqrtAvg = (outputIabSqrtSum / AtomAllSum);
+                for (int x = 0; x < iabCount; x++)
+                {
+                    outputVariance += (Math.Pow((IabSqrt[x] - outputIabSqrtAvg), 2) * IabCount[x]);
+                    outputVarianceIab += (Math.Pow((Iab[x] - outputIabAvg), 2) * IabCount[x]);
+                }
                 outputVariance = (outputVariance / (AtomAllSum - 1));
                 outputVarianceIab = (outputVarianceIab / (AtomAllSum - 1));
                 outputVarianceSqrt = Math.Sqrt(outputVariance);
