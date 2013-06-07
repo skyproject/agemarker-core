@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) Mikhail Labushev. All rights reserved.
  *
  * This file is a part of agemarker-core library licensed
@@ -29,14 +29,21 @@ AgemarkerCore::~AgemarkerCore()
 void AgemarkerCore::startCalculation()
 {
     calculateAtoms();
+    Data::CalculationThreadShared threadsShared;
+    threadsShared.atomsUsed = new AtomicUInt64[ELEMENTS_COUNT];
+    threadsShared.random = new MTRandom();
+    for ( int x = 0; x < ELEMENTS_COUNT; ++x )
+    {
+        threadsShared.atomsUsed[x] = 0;
+    }
+    Data::CalculationThreadInput threadInput;
+    threadInput.logarithm = this->data.log;
+    threadInput.atomAllEight = this->atomAllEight;
+    threadInput.atomAllEightSum = this->atomAllEightSum;
+    threadInput.elementsWeight = this->data.elementsWeight;
+    threadInput.decimalPrecision = this->data.decimalPrecision;
     uint64_t threadIterations = round ( this->atomAllSum / this->runningThreads );
-    Data::CalculationThreadInput threadData;
-    threadData.logarithm = this->data.log;
-    threadData.atomAllEight = this->atomAllEight;
-    threadData.atomAllEightSum = this->atomAllEightSum;
-    threadData.elementsWeight = this->data.elementsWeight;
-    threadData.decimalPrecision = this->data.decimalPrecision;
-    for ( int x = 0; x < this->runningThreads; x++ )
+    for ( int x = 0; x < this->runningThreads; ++x )
     {
         uint64_t start = ( threadIterations * x );
         uint64_t end = 0;
@@ -48,9 +55,9 @@ void AgemarkerCore::startCalculation()
         {
             end = ( threadIterations * ( x + 1 ) );
         }
-        threadData.startIteration = start;
-        threadData.endIteration = end;
-        CalculationThread *thread = new CalculationThread ( threadData );
+        threadInput.startIteration = start;
+        threadInput.endIteration = end;
+        CalculationThread *thread = new CalculationThread ( threadInput, threadsShared );
         connect ( thread, SIGNAL ( threadCalculationFinished ( Data::IpValuesMap ) ),
                   this, SLOT ( collectThreadResult ( Data::IpValuesMap ) ) );
         thread->start();
@@ -60,7 +67,7 @@ void AgemarkerCore::startCalculation()
 
 void AgemarkerCore::pauseCalculation()
 {
-    for ( uint x = 0; x < this->threads.size(); x++ )
+    for ( uint x = 0; x < this->threads.size(); ++x )
     {
         this->threads[x]->pauseThread();
     }
@@ -68,7 +75,7 @@ void AgemarkerCore::pauseCalculation()
 
 void AgemarkerCore::resumeCalculation()
 {
-    for ( uint x = 0; x < this->threads.size(); x++ )
+    for ( uint x = 0; x < this->threads.size(); ++x )
     {
         this->threads[x]->resumeThread();
     }
@@ -76,7 +83,7 @@ void AgemarkerCore::resumeCalculation()
 
 void AgemarkerCore::removeCalculation()
 {
-    for ( uint x = 0; x < this->threads.size(); x++ )
+    for ( uint x = 0; x < this->threads.size(); ++x )
     {
         connect ( this->threads[x], SIGNAL ( finished() ),
                   this->threads[x], SLOT ( deleteLater() ) );
@@ -119,7 +126,6 @@ ACL::Data::CalculationResult AgemarkerCore::getCalculationResult()
     r.atoms = this->atomAllEight;
     r.atomsSum = this->atomAllEightSum;
 
-
     for ( Data::IpValuesMap::const_iterator iter = this->calculatedIp.begin();
           iter != this->calculatedIp.end(); ++iter )
     {
@@ -133,29 +139,29 @@ ACL::Data::CalculationResult AgemarkerCore::getCalculationResult()
         double outputIpSum = 0;
         double outputIpSqrtSum = 0;
 
-        for ( int x = 0; x < ipCount; x++ )
+        for ( int x = 0; x < ipCount; ++x )
         {
-            outputIpSum +=  ( r.ip[x] * r.ipCount[x] );
-            outputIpSqrtSum +=  ( r.ipSqrt[x] * r.ipCount[x] );
+            outputIpSum += ( r.ip[x] * r.ipCount[x] );
+            outputIpSqrtSum += ( r.ipSqrt[x] * r.ipCount[x] );
         }
 
         r.ipAverage = ( outputIpSum / this->atomAllSum );
         r.ipSqrtAverage = ( outputIpSqrtSum / this->atomAllSum );
 
-        for ( int x = 0; x < ipCount; x++ )
+        for ( int x = 0; x < ipCount; ++x )
         {
             r.ipSqrtVariance += ( std::pow ( ( r.ipSqrt[x] - r.ipSqrtAverage ), 2 ) * r.ipCount[x] );
             r.ipVariance += ( std::pow ( ( r.ip[x] - r.ipAverage ), 2 ) * r.ipCount[x] );
         }
-        r.ipSqrtVariance =  ( r.ipSqrtVariance / ( this->atomAllSum - 1 ) );
-        r.ipVariance =  ( r.ipVariance / ( this->atomAllSum - 1 ) );
+        r.ipSqrtVariance = ( r.ipSqrtVariance / ( this->atomAllSum - 1 ) );
+        r.ipVariance = ( r.ipVariance / ( this->atomAllSum - 1 ) );
         r.ipSqrtStandardDeviation = std::sqrt ( r.ipSqrtVariance );
         r.ipStandardDeviation = std::sqrt ( r.ipVariance );
-        r.ipRange =  ( r.ip[ ( ipCount - 1 )] - r.ip[0] );
+        r.ipRange = ( r.ip[ ( ipCount - 1 )] - r.ip[0] );
         r.ipIntervalLength = ( r.ipRange / this->data.intervalsNumber );
         r.ipSqrtRange = ( std::sqrt ( r.ip[ ( ipCount - 1 )] ) - std::sqrt ( r.ip[0] ) );
         r.ipSqrtIntervalLength = ( r.ipSqrtRange / this->data.intervalsNumber );
-        for ( int x = 0; x < this->data.intervalsNumber; x++ )
+        for ( int x = 0; x < this->data.intervalsNumber; ++x )
         {
             r.ipIntervalMinimum.push_back ( r.ip[0] +  ( r.ipIntervalLength * x ) );
             r.ipIntervalMaximum.push_back ( r.ip[0] +  ( r.ipIntervalLength * ( x + 1 ) ) );
@@ -166,9 +172,9 @@ ACL::Data::CalculationResult AgemarkerCore::getCalculationResult()
             r.ipIntervalCount.push_back ( 0 );
             r.ipSqrtIntervalCount.push_back ( 0 );
         }
-        for ( int x = 0; x < ipCount; x++ )
+        for ( int x = 0; x < ipCount; ++x )
         {
-            for ( int y = 0; y < this->data.intervalsNumber; y++ )
+            for ( int y = 0; y < this->data.intervalsNumber; ++y )
             {
                 if  ( r.ip[x] <= r.ipIntervalMaximum[y] )
                 {
@@ -176,7 +182,7 @@ ACL::Data::CalculationResult AgemarkerCore::getCalculationResult()
                     break;
                 }
             }
-            for ( int y = 0; y < this->data.intervalsNumber; y++ )
+            for ( int y = 0; y < this->data.intervalsNumber; ++y )
             {
                 if  ( r.ipSqrt[x] <= r.ipSqrtIntervalMaximum[y] )
                 {
@@ -195,10 +201,7 @@ ACL::Data::CalculationResult AgemarkerCore::getCalculationResult()
 
 void AgemarkerCore::calculateAtoms()
 {
-    double oxidesOxygen[53];
-    double oxidesPureElement[53];
-    double oxidesWeightSum[53];
-    double atomNor[118];
+    double oxidesWeightSum[OXIDES_COUNT];
     oxidesWeightSum[0] = ( ( this->data.elementsWeight[13] * 1 ) + ( this->data.elementsWeight[7] * 2 ) );
     oxidesWeightSum[1] = ( ( this->data.elementsWeight[21] * 1 ) + ( this->data.elementsWeight[7] * 2 ) );
     oxidesWeightSum[2] = ( ( this->data.elementsWeight[12] * 2 ) + ( this->data.elementsWeight[7] * 3 ) );
@@ -252,6 +255,7 @@ void AgemarkerCore::calculateAtoms()
     oxidesWeightSum[50] = ( ( this->data.elementsWeight[43] * 1 ) + ( this->data.elementsWeight[7] * 2 ) );
     oxidesWeightSum[51] = ( ( this->data.elementsWeight[54] * 2 ) + ( this->data.elementsWeight[7] * 1 ) );
     oxidesWeightSum[52] = ( ( this->data.elementsWeight[36] * 2 ) + ( this->data.elementsWeight[7] * 1 ) );
+    double oxidesPureElement[OXIDES_COUNT];
     oxidesPureElement[0] = ( ( this->data.elementsWeight[13] * 1 ) * ( this->data.oxidesContent[0] ) / ( oxidesWeightSum[0] ) );
     oxidesPureElement[1] = ( ( this->data.elementsWeight[21] * 1 ) * ( this->data.oxidesContent[1] ) / ( oxidesWeightSum[1] ) );
     oxidesPureElement[2] = ( ( this->data.elementsWeight[12] * 2 ) * ( this->data.oxidesContent[2] ) / ( oxidesWeightSum[2] ) );
@@ -305,10 +309,6 @@ void AgemarkerCore::calculateAtoms()
     oxidesPureElement[50] = ( ( this->data.elementsWeight[43] * 1 ) * ( this->data.oxidesContent[50] ) / ( oxidesWeightSum[50] ) );
     oxidesPureElement[51] = ( ( this->data.elementsWeight[54] * 2 ) * ( this->data.oxidesContent[51] ) / ( oxidesWeightSum[51] ) );
     oxidesPureElement[52] = ( ( this->data.elementsWeight[36] * 2 ) * ( this->data.oxidesContent[52] ) / ( oxidesWeightSum[52] ) );
-    for ( int x = 0; x < 53; x++ )
-    {
-        oxidesOxygen[x] = ( ( this->data.oxidesContent[x] ) - ( oxidesPureElement[x] ) );
-    }
     this->elementsNewContent = this->data.elementsContent;
     this->elementsNewContent[13] += oxidesPureElement[0];
     this->elementsNewContent[21] += oxidesPureElement[1];
@@ -362,28 +362,17 @@ void AgemarkerCore::calculateAtoms()
     this->elementsNewContent[43] += oxidesPureElement[50];
     this->elementsNewContent[54] += oxidesPureElement[51];
     this->elementsNewContent[36] += oxidesPureElement[52];
-    for ( int x = 0; x < 53; x++ )
+    for ( int x = 0; x < OXIDES_COUNT; ++x )
     {
-        this->elementsNewContent[7] += oxidesOxygen[x];
+        double oxideOxygen = ( ( this->data.oxidesContent[x] ) - ( oxidesPureElement[x] ) );
+        this->elementsNewContent[7] += oxideOxygen;
     }
-    for ( int x = 0; x < 118; x++ )
+    for ( int x = 0; x < ELEMENTS_COUNT; ++x )
     {
-        atomNor[x] = ( this->elementsNewContent[x] / this->data.elementsWeight[x] );
-    }
-    for ( int x = 0; x < 118; x++ )
-    {
-        this->atomAll.push_back ( atomNor[x] * this->data.multiplier );
-    }
-    for ( int x = 0; x < 118; x++ )
-    {
+        double nor = ( this->elementsNewContent[x] / this->data.elementsWeight[x] );
+        this->atomAll.push_back ( nor * this->data.multiplier );
         this->atomAllSum += this->atomAll[x];
-    }
-    for ( int x = 0; x < 118; x++ )
-    {
         this->atomAllEight.push_back ( this->atomAll[x] * 8 );
-    }
-    for ( int x = 0; x < 118; x++ )
-    {
         this->atomAllEightSum += this->atomAllEight[x];
     }
 }

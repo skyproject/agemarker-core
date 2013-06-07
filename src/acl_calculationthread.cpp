@@ -7,14 +7,15 @@
  */
 
 #include "acl_calculationthread.h"
-#include "acl_mtrandom.h"
 #include "acl_math.h"
 
 using namespace ACL;
 
-CalculationThread::CalculationThread ( Data::CalculationThreadInput input )
+CalculationThread::CalculationThread (Data::CalculationThreadInput input,
+                                      Data::CalculationThreadShared shared)
 {
     this->threadInput = input;
+    this->threadData = shared;
 }
 
 void CalculationThread::pauseThread()
@@ -40,18 +41,11 @@ void CalculationThread::removeThread()
 
 void CalculationThread::run()
 {
-    MTRandom *rnd = new MTRandom();
-    std::vector<double> input;
-    uint64_t count[118];
-    int x = 0;
-    for ( x = 0; x < 118; x++ )
-    {
-        count[x] = 0;
-    }
-    uint64_t r, rr;
+    std::vector<double> input = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    uint64_t atomicWeightSelector, atomicWeightIterator;
     Data::IpValuesMap ipMap;
     for ( uint64_t l = this->threadInput.startIteration;
-          l < this->threadInput.endIteration; l++ )
+          l < this->threadInput.endIteration; ++l )
     {
         if ( this->cancel == true )
         {
@@ -63,32 +57,35 @@ void CalculationThread::run()
             this->pauseCond.wait ( &this->syncMutex );
         }
         this->syncMutex.unlock();
-        input.clear();
-        for ( x = 0; x < 9; x++ )
+        std::fill ( input.begin(), input.end(), 0 );
+        /* The loop below randomly places 8 atomic weights
+         * from 'atomAllEight' to the 'input' vector
+         * and fills the 9th value of this vector with the
+         * total sum of atomic weights in it.
+         */
+        for ( int input_it = 0; input_it < 8; ++input_it )
         {
-            input.push_back ( 0 );
-        }
-        for ( int y = 0; y < 8; y++ )
-        {
-            while ( input[y] == 0 )
+            while ( input[input_it] == 0 )
             {
-                r = rnd->getRandomULongLong ( 1, this->threadInput.atomAllEightSum );
-                rr = 0;
-                for ( int z = 0; z < 118; z++ )
+                atomicWeightSelector = this->threadData.random->getRandomULongLong ( 1, this->threadInput.atomAllEightSum );
+                atomicWeightIterator = 0;
+                for ( int elements_it = 0; elements_it < ELEMENTS_COUNT; ++elements_it )
                 {
-                    if ( this->threadInput.atomAllEight[z] != 0 )
+                    if ( this->threadInput.atomAllEight[elements_it] != 0 )
                     {
-                        rr += this->threadInput.atomAllEight[z];
-                        if ( r <= rr && count[z] < this->threadInput.atomAllEight[z] )
+                       atomicWeightIterator += this->threadInput.atomAllEight[elements_it];
+                       if ( atomicWeightSelector <= atomicWeightIterator
+                             && this->threadData.atomsUsed[elements_it] <
+                                this->threadInput.atomAllEight[elements_it] )
                         {
-                            input[y] = this->threadInput.elementsWeight[z];
-                            count[z]++;
+                            input[input_it] = this->threadInput.elementsWeight[elements_it];
+                            ++this->threadData.atomsUsed[elements_it];
                             break;
                         }
                     }
                 }
             }
-            input[8] += input[y];
+            input[8] += input[input_it];
         }
         double ip = Math::roundDouble ( Math::ip ( input, this->threadInput.logarithm ), this->threadInput.decimalPrecision );
         std::map<double, uint64_t>::iterator it = ipMap.find ( ip );

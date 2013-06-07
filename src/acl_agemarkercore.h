@@ -12,7 +12,6 @@
 #include <QObject>
 
 #include "acl_calculationthread.h"
-#include "acl_global.h"
 #include "acl_data.h"
 
 namespace ACL

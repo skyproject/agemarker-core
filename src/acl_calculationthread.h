@@ -10,7 +10,6 @@
 #define ACL_CALCULATIONTHREAD_H
 
 #include <QWaitCondition>
-#include <QObject>
 #include <QThread>
 #include <QMutex>
 
@@ -23,7 +22,7 @@ namespace ACL
         Q_OBJECT
 
         public:
-            CalculationThread ( Data::CalculationThreadInput input );
+            CalculationThread ( Data::CalculationThreadInput input, Data::CalculationThreadShared shared );
             void pauseThread();
             void resumeThread();
             void removeThread();
@@ -34,6 +33,7 @@ namespace ACL
         private:
             void run();
             Data::CalculationThreadInput threadInput;
+            Data::CalculationThreadShared threadData;
             QMutex syncMutex;
             QWaitCondition pauseCond;
             bool pause = false;

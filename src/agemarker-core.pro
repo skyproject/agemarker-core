@@ -25,11 +25,8 @@ HEADERS += acl_global.h \
            acl_mtrandom.h \
            acl_math.h \
            acl_data.h \
-           acl_calculationthread.h \
-           application.h
-
-
-win32:RC_FILE = resources.rc
+           acl_atomic.h \
+           acl_calculationthread.h
 
 
 unix:!symbian {

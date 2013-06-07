@@ -9,10 +9,17 @@
 #ifndef ACL_DATA_H
 #define ACL_DATA_H
 
+/* The number of chemical elements used in Agemarker calculations */
+#define ELEMENTS_COUNT          118
+
+/* The number of oxides used in Agemarker calculations */
+#define OXIDES_COUNT            53
+
 #include <vector>
 #include <map>
 
-#include "acl_global.h"
+#include "acl_mtrandom.h"
+#include "acl_atomic.h"
 
 namespace ACL
 {
@@ -44,6 +51,11 @@ namespace ACL
                 uint64_t startIteration;
                 uint64_t endIteration;
                 int decimalPrecision;
+            };
+            struct CalculationThreadShared
+            {
+                AtomicUInt64 *atomsUsed;
+                MTRandom *random;
             };
             struct CalculationResult
             {
