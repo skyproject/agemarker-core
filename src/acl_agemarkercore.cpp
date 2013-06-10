@@ -30,8 +30,10 @@ void AgemarkerCore::startCalculation()
 {
     calculateAtoms();
     Data::CalculationThreadShared threadsShared;
-    threadsShared.atomsUsed = new AtomicUInt64[ELEMENTS_COUNT];
     threadsShared.random = new MTRandom();
+    threadsShared.runningThreads = new int();
+    *threadsShared.runningThreads = this->runningThreads;
+    threadsShared.atomsUsed = new AtomicUInt64[ELEMENTS_COUNT];
     for ( int x = 0; x < ELEMENTS_COUNT; ++x )
     {
         threadsShared.atomsUsed[x] = 0;
@@ -109,8 +111,10 @@ void AgemarkerCore::collectThreadResult ( Data::IpValuesMap result )
     this->runningThreads--;
     if ( this->runningThreads == 0 )
     {
-        threads.clear();
-        threads.shrink_to_fit();
+        for ( int x = 0; x < this->threads.size(); ++x )
+        {
+            delete this->threads[x];
+        }
         emit calculationFinished ( getCalculationResult() );
     }
 }

@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) Mikhail Labushev. All rights reserved.
+ *
+ * This file is a part of agemarker-core library licensed
+ * under the GNU Lesser General Public License, version 3.
+ * For full terms see LICENSE file.
+ */
+
 #ifndef ACL_ATOMIC_H
 #define ACL_ATOMIC_H
 

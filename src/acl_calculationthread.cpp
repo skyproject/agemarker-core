@@ -11,11 +11,22 @@
 
 using namespace ACL;
 
-CalculationThread::CalculationThread (Data::CalculationThreadInput input,
-                                      Data::CalculationThreadShared shared)
+CalculationThread::CalculationThread ( Data::CalculationThreadInput input,
+                                       Data::CalculationThreadShared shared )
 {
     this->threadInput = input;
     this->threadData = shared;
+}
+
+CalculationThread::~CalculationThread()
+{
+    *this->threadData.runningThreads = *this->threadData.runningThreads - 1;
+    if ( *this->threadData.runningThreads == 0 )
+    {
+        delete this->threadData.random;
+        delete[] this->threadData.atomsUsed;
+        delete this->threadData.runningThreads;
+    }
 }
 
 void CalculationThread::pauseThread()
@@ -73,10 +84,10 @@ void CalculationThread::run()
                 {
                     if ( this->threadInput.atomAllEight[elements_it] != 0 )
                     {
-                       atomicWeightIterator += this->threadInput.atomAllEight[elements_it];
-                       if ( atomicWeightSelector <= atomicWeightIterator
+                        atomicWeightIterator += this->threadInput.atomAllEight[elements_it];
+                        if ( atomicWeightSelector <= atomicWeightIterator
                              && this->threadData.atomsUsed[elements_it] <
-                                this->threadInput.atomAllEight[elements_it] )
+                             this->threadInput.atomAllEight[elements_it] )
                         {
                             input[input_it] = this->threadInput.elementsWeight[elements_it];
                             ++this->threadData.atomsUsed[elements_it];

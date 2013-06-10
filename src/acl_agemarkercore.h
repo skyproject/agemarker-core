@@ -18,7 +18,7 @@ namespace ACL
 {
     class AGEMARKERCORESHARED_EXPORT AgemarkerCore : public QObject
     {
-        Q_OBJECT
+            Q_OBJECT
 
         public:
             AgemarkerCore ( Data::CalculationInput input );

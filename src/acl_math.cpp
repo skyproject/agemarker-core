@@ -80,7 +80,7 @@ double Math::ip ( std::vector<double> input, Data::Logarithm log )
     return ( rowsUncertaintyTotal + columnsUncertaintyTotal - kab );
 }
 
-double Math::roundDouble(double source, int decimals)
+double Math::roundDouble ( double source, int decimals )
 {
     return std::ceil ( ( source * std::pow ( 10, decimals ) ) - 0.49L ) / std::pow ( 10, decimals );
 }

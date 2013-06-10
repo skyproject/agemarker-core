@@ -19,10 +19,11 @@ namespace ACL
 {
     class CalculationThread : public QThread
     {
-        Q_OBJECT
+            Q_OBJECT
 
         public:
             CalculationThread ( Data::CalculationThreadInput input, Data::CalculationThreadShared shared );
+            ~CalculationThread();
             void pauseThread();
             void resumeThread();
             void removeThread();
