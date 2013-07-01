@@ -1,8 +1,8 @@
 /*
- * Copyright (C) Mikhail Labushev. All rights reserved.
+ * Copyright (c) 2013 Mikhail Labushev.
  *
- * This file is a part of agemarker-core library licensed
- * under the GNU Lesser General Public License, version 3.
+ * This file is a part of agemarker-core
+ * library distributed under the MIT License.
  * For full terms see LICENSE file.
  */
 
