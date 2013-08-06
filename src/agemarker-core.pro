@@ -7,6 +7,7 @@
 QT       -= gui
 
 QMAKE_CXXFLAGS += -std=c++0x
+QMAKE_CXXFLAGS_RELEASE += -O2
 
 TARGET = agemarker-core
 TEMPLATE = lib
