@@ -15,16 +15,16 @@ using namespace ACL;
 
 MTRandom::MTRandom()
 {
-    mtwister_engine.seed ( ( unsigned ) time ( NULL ) );
+    mtwister_engine.seed((unsigned) time(NULL));
 }
 
-uint64_t MTRandom::getRandomULongLong ( uint64_t minValue, uint64_t maxValue )
+uint64_t MTRandom::getRandomULongLong(uint64_t minValue, uint64_t maxValue)
 {
     uint64_t number = mtwister_engine();
 
-    if ( minValue != maxValue )
+    if (minValue != maxValue)
     {
-        return ( std::abs ( number % ( maxValue - minValue ) ) + minValue );
+        return (std::abs(number % (maxValue - minValue)) + minValue);
     }
     else
     {

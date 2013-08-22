@@ -21,7 +21,7 @@ namespace ACL
             Q_OBJECT
 
         public:
-            AgemarkerCore ( Data::CalculationInput input );
+            AgemarkerCore(Data::CalculationInput input);
             ~AgemarkerCore();
             void startCalculation();
             void pauseCalculation();
@@ -29,10 +29,10 @@ namespace ACL
             void removeCalculation();
 
         signals:
-            void calculationFinished ( ACL::Data::CalculationResult result );
+            void calculationFinished(ACL::Data::CalculationResult result);
 
         private slots:
-            void collectThreadResult ( Data::IpValuesMap result );
+            void collectThreadResult(Data::IpValuesMap result);
 
         private:
             void calculateAtoms();

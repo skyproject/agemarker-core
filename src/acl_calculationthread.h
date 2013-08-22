@@ -22,14 +22,14 @@ namespace ACL
             Q_OBJECT
 
         public:
-            CalculationThread ( Data::CalculationThreadInput input, Data::CalculationThreadShared shared );
+            CalculationThread(Data::CalculationThreadInput input, Data::CalculationThreadShared shared);
             ~CalculationThread();
             void pauseThread();
             void resumeThread();
             void removeThread();
 
         signals:
-            void threadCalculationFinished ( Data::IpValuesMap calculatedIpValues );
+            void threadCalculationFinished(Data::IpValuesMap calculatedIpValues);
 
         private:
             void run();
