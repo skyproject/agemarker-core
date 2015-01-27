@@ -138,66 +138,144 @@ ACL::Data::CalculationResult AgemarkerCore::getCalculationResult()
         r.ipCount.push_back(iter->second);
     }
 
-    try
+    if (ipCount > 0)
     {
-        double outputIpSum = 0;
-        double outputIpSqrtSum = 0;
-
-        for (int x = 0; x < ipCount; ++x)
+        try
         {
-            outputIpSum += (r.ip[x] * r.ipCount[x]);
-            outputIpSqrtSum += (r.ipSqrt[x] * r.ipCount[x]);
+            double outputIpSum = 0;
+            double outputIpSqrtSum = 0;
+
+            for (int x = 0; x < ipCount; ++x)
+            {
+                outputIpSum += (r.ip[x] * r.ipCount[x]);
+                outputIpSqrtSum += (r.ipSqrt[x] * r.ipCount[x]);
+            }
+
+            r.ipAverage = (outputIpSum / this->atomAllSum);
+            r.ipSqrtAverage = (outputIpSqrtSum / this->atomAllSum);
+
+            for (int x = 0; x < ipCount; ++x)
+            {
+                r.ipSqrtVariance += (std::pow((r.ipSqrt[x] - r.ipSqrtAverage), 2) * r.ipCount[x]);
+                r.ipVariance += (std::pow((r.ip[x] - r.ipAverage), 2) * r.ipCount[x]);
+
+                r.ipSqrtSkewnessOfDataset += (std::pow((r.ipSqrt[x] - r.ipSqrtAverage), 3) * r.ipCount[x]);
+                r.ipSkewnessOfDataset += (std::pow((r.ip[x] - r.ipAverage), 3) * r.ipCount[x]);
+
+                r.ipSqrtExcessKurtosisOfDataset += (std::pow((r.ipSqrt[x] - r.ipSqrtAverage), 4) * r.ipCount[x]);
+                r.ipExcessKurtosisOfDataset += (std::pow((r.ip[x] - r.ipAverage), 4) * r.ipCount[x]);
+            }
+
+            r.ipSqrtVariance = (r.ipSqrtVariance / (this->atomAllSum - 1));
+            r.ipVariance = (r.ipVariance / (this->atomAllSum - 1));
+            r.ipSqrtStandardDeviation = std::sqrt(r.ipSqrtVariance);
+            r.ipStandardDeviation = std::sqrt(r.ipVariance);
+
+            /* Skewness of dataset */
+
+            r.ipSqrtSkewnessOfDataset = (r.ipSqrtSkewnessOfDataset / (std::pow(r.ipSqrtStandardDeviation, 3)));
+            r.ipSkewnessOfDataset = (r.ipSkewnessOfDataset / (std::pow(r.ipStandardDeviation, 3)));
+
+            double denom = ((this->atomAllSum - 1) * (this->atomAllSum - 2));
+            double fraction = (this->atomAllSum / denom);
+
+            r.ipSqrtSkewnessOfDataset = (r.ipSqrtSkewnessOfDataset * fraction);
+            r.ipSkewnessOfDataset = (r.ipSkewnessOfDataset * fraction);
+
+            /* Excess kurtosis */
+
+            r.ipSqrtExcessKurtosisOfDataset = (r.ipSqrtExcessKurtosisOfDataset / (std::pow(r.ipSqrtStandardDeviation, 4)));
+            r.ipExcessKurtosisOfDataset = (r.ipExcessKurtosisOfDataset / (std::pow(r.ipStandardDeviation, 4)));
+
+            double x0 = (this->atomAllSum + 1);
+            double x1 = (this->atomAllSum - 1);
+            double x2 = (this->atomAllSum - 2);
+            double x3 = (this->atomAllSum - 3);
+
+            double num = (this->atomAllSum * x0);
+            denom = (x1 * x2 * x3);
+            fraction = (num / denom);
+
+            r.ipSqrtExcessKurtosisOfDataset = (r.ipSqrtExcessKurtosisOfDataset * fraction);
+            r.ipExcessKurtosisOfDataset = (r.ipExcessKurtosisOfDataset * fraction);
+
+            num = (3 * (std::pow((this->atomAllSum - 1), 2)));
+            denom = ((this->atomAllSum - 2) * (this->atomAllSum - 3));
+            fraction = (num / denom);
+
+            r.ipSqrtExcessKurtosisOfDataset = (r.ipSqrtExcessKurtosisOfDataset - fraction);
+            r.ipExcessKurtosisOfDataset = (r.ipExcessKurtosisOfDataset - fraction);
+
+            /* Mean square error */
+
+            r.ipSqrtMeanSquareError = (r.ipSqrtVariance / this->atomAllSum);
+            r.ipMeanSquareError = (r.ipVariance / this->atomAllSum);
+
+            /* Ip intervals */
+
+            r.ipRange = (r.ip[(ipCount - 1)] - r.ip[0]);
+            r.ipIntervalLength = (r.ipRange / this->data.intervalsNumber);
+            r.ipSqrtRange = (std::sqrt(r.ip[(ipCount - 1)]) - std::sqrt(r.ip[0]));
+            r.ipSqrtIntervalLength = (r.ipSqrtRange / this->data.intervalsNumber);
+
+            for (int x = 0; x < this->data.intervalsNumber; ++x)
+            {
+                r.ipIntervalMinimum.push_back(r.ip[0] + (r.ipIntervalLength * x));
+                r.ipSqrtIntervalMinimum.push_back(std::sqrt(r.ip[0]) + (r.ipSqrtIntervalLength * x));
+
+                if (x < (this->data.intervalsNumber - 1))
+                {
+                    r.ipIntervalMaximum.push_back(r.ip[0] + (r.ipIntervalLength * (x + 1)));
+                    r.ipSqrtIntervalMaximum.push_back(r.ipSqrt[0] + (r.ipSqrtIntervalLength * (x + 1)));
+                }
+                else
+                {
+                    r.ipIntervalMaximum.push_back(r.ip[(ipCount - 1)]);
+                    r.ipSqrtIntervalMaximum.push_back(r.ipSqrt[(ipCount - 1)]);
+                }
+
+                r.ipIntervalCenter.push_back((r.ipIntervalMinimum[x] + r.ipIntervalMaximum[x]) / 2);
+                r.ipSqrtIntervalCenter.push_back((r.ipSqrtIntervalMinimum[x] + r.ipSqrtIntervalMaximum[x]) / 2);
+                r.ipIntervalCount.push_back(0);
+                r.ipSqrtIntervalCount.push_back(0);
+            }
+            for (int x = 0; x < ipCount; ++x)
+            {
+                for (int y = 0; y < this->data.intervalsNumber; ++y)
+                {
+                    if (r.ip[x] <= r.ipIntervalMaximum[y])
+                    {
+                        r.ipIntervalCount[y] += r.ipCount[x];
+                        break;
+                    }
+                }
+                for (int y = 0; y < this->data.intervalsNumber; ++y)
+                {
+                    if (r.ipSqrt[x] <= r.ipSqrtIntervalMaximum[y])
+                    {
+                        r.ipSqrtIntervalCount[y] += r.ipCount[x];
+                        break;
+                    }
+                }
+            }
         }
-
-        r.ipAverage = (outputIpSum / this->atomAllSum);
-        r.ipSqrtAverage = (outputIpSqrtSum / this->atomAllSum);
-
-        for (int x = 0; x < ipCount; ++x)
+        catch (...)
         {
-            r.ipSqrtVariance += (std::pow((r.ipSqrt[x] - r.ipSqrtAverage), 2) * r.ipCount[x]);
-            r.ipVariance += (std::pow((r.ip[x] - r.ipAverage), 2) * r.ipCount[x]);
         }
-        r.ipSqrtVariance = (r.ipSqrtVariance / (this->atomAllSum - 1));
-        r.ipVariance = (r.ipVariance / (this->atomAllSum - 1));
-        r.ipSqrtStandardDeviation = std::sqrt(r.ipSqrtVariance);
-        r.ipStandardDeviation = std::sqrt(r.ipVariance);
-        r.ipRange = (r.ip[(ipCount - 1)] - r.ip[0]);
-        r.ipIntervalLength = (r.ipRange / this->data.intervalsNumber);
-        r.ipSqrtRange = (std::sqrt(r.ip[(ipCount - 1)]) - std::sqrt(r.ip[0]));
-        r.ipSqrtIntervalLength = (r.ipSqrtRange / this->data.intervalsNumber);
+    }
+    else
+    {
         for (int x = 0; x < this->data.intervalsNumber; ++x)
         {
-            r.ipIntervalMinimum.push_back(r.ip[0] + (r.ipIntervalLength * x));
-            r.ipIntervalMaximum.push_back(r.ip[0] + (r.ipIntervalLength * (x + 1)));
-            r.ipIntervalCenter.push_back((r.ipIntervalMinimum[x] + r.ipIntervalMaximum[x]) / 2);
-            r.ipSqrtIntervalMinimum.push_back(std::sqrt(r.ip[0]) + (r.ipSqrtIntervalLength * x));
-            r.ipSqrtIntervalMaximum.push_back(std::sqrt(r.ip[0]) + (r.ipSqrtIntervalLength * (x + 1)));
-            r.ipSqrtIntervalCenter.push_back((r.ipSqrtIntervalMinimum[x] + r.ipSqrtIntervalMaximum[x]) / 2);
+            r.ipIntervalMinimum.push_back(0);
+            r.ipIntervalMaximum.push_back(0);
+            r.ipIntervalCenter.push_back(0);
+            r.ipSqrtIntervalMinimum.push_back(0);
+            r.ipSqrtIntervalMaximum.push_back(0);
+            r.ipSqrtIntervalCenter.push_back(0);
             r.ipIntervalCount.push_back(0);
             r.ipSqrtIntervalCount.push_back(0);
         }
-        for (int x = 0; x < ipCount; ++x)
-        {
-            for (int y = 0; y < this->data.intervalsNumber; ++y)
-            {
-                if (r.ip[x] <= r.ipIntervalMaximum[y])
-                {
-                    r.ipIntervalCount[y] += r.ipCount[x];
-                    break;
-                }
-            }
-            for (int y = 0; y < this->data.intervalsNumber; ++y)
-            {
-                if (r.ipSqrt[x] <= r.ipSqrtIntervalMaximum[y])
-                {
-                    r.ipSqrtIntervalCount[y] += r.ipCount[x];
-                    break;
-                }
-            }
-        }
-    }
-    catch (...)
-    {
     }
 
     return r;
@@ -217,7 +295,7 @@ void AgemarkerCore::calculateAtoms()
     oxidesWeightSum[8] = ((this->data.elementsWeight[19] * 1) + (this->data.elementsWeight[7] * 1));
     oxidesWeightSum[9] = ((this->data.elementsWeight[10] * 2) + (this->data.elementsWeight[7] * 1));
     oxidesWeightSum[10] = ((this->data.elementsWeight[0] * 2) + (this->data.elementsWeight[7] * 1));
-    oxidesWeightSum[11] = ((this->data.elementsWeight[0] * 2) + (this->data.elementsWeight[7] * 1));
+    oxidesWeightSum[11] = ((this->data.elementsWeight[14] * 4) + (this->data.elementsWeight[7] * 6));
     oxidesWeightSum[12] = ((this->data.elementsWeight[14] * 2) + (this->data.elementsWeight[7] * 5));
     oxidesWeightSum[13] = ((this->data.elementsWeight[5] * 1) + (this->data.elementsWeight[7] * 2));
     oxidesWeightSum[14] = ((this->data.elementsWeight[4] * 2) + (this->data.elementsWeight[7] * 3));
@@ -271,7 +349,7 @@ void AgemarkerCore::calculateAtoms()
     oxidesPureElement[8] = ((this->data.elementsWeight[19] * 1) * (this->data.oxidesContent[8]) / (oxidesWeightSum[8]));
     oxidesPureElement[9] = ((this->data.elementsWeight[10] * 2) * (this->data.oxidesContent[9]) / (oxidesWeightSum[9]));
     oxidesPureElement[10] = ((this->data.elementsWeight[0] * 2) * (this->data.oxidesContent[10]) / (oxidesWeightSum[10]));
-    oxidesPureElement[11] = ((this->data.elementsWeight[0] * 2) * (this->data.oxidesContent[11]) / (oxidesWeightSum[11]));
+    oxidesPureElement[11] = ((this->data.elementsWeight[14] * 4) * (this->data.oxidesContent[11]) / (oxidesWeightSum[11]));
     oxidesPureElement[12] = ((this->data.elementsWeight[14] * 2) * (this->data.oxidesContent[12]) / (oxidesWeightSum[12]));
     oxidesPureElement[13] = ((this->data.elementsWeight[5] * 1) * (this->data.oxidesContent[13]) / (oxidesWeightSum[13]));
     oxidesPureElement[14] = ((this->data.elementsWeight[4] * 2) * (this->data.oxidesContent[14]) / (oxidesWeightSum[14]));
@@ -325,7 +403,7 @@ void AgemarkerCore::calculateAtoms()
     this->elementsNewContent[19] += oxidesPureElement[8];
     this->elementsNewContent[10] += oxidesPureElement[9];
     this->elementsNewContent[0] += oxidesPureElement[10];
-    this->elementsNewContent[0] += oxidesPureElement[11];
+    this->elementsNewContent[14] += oxidesPureElement[11];
     this->elementsNewContent[14] += oxidesPureElement[12];
     this->elementsNewContent[5] += oxidesPureElement[13];
     this->elementsNewContent[4] += oxidesPureElement[14];
@@ -373,7 +451,15 @@ void AgemarkerCore::calculateAtoms()
     }
     for (int x = 0; x < ELEMENTS_COUNT; ++x)
     {
-        double nor = (this->elementsNewContent[x] / this->data.elementsWeight[x]);
+        double nor;
+        if (this->data.elementsContentUnits == Data::ElementsContentUnits::MassPercent)
+        {
+            nor = (this->elementsNewContent[x] / this->data.elementsWeight[x]);
+        }
+        else
+        {
+            nor = this->elementsNewContent[x];
+        }
         this->atomAll.push_back(nor * this->data.multiplier);
         this->atomAllSum += this->atomAll[x];
         this->atomAllEight.push_back(this->atomAll[x] * 8);

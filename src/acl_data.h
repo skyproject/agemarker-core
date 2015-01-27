@@ -31,6 +31,11 @@ namespace ACL
                 Natural,
                 Decimal
             };
+            enum class ElementsContentUnits
+            {
+                MassPercent,
+                NumberOfAtoms
+            };
             struct CalculationInput
             {
                 std::vector<double> oxidesContent;
@@ -40,6 +45,7 @@ namespace ACL
                 uint64_t multiplier;
                 int intervalsNumber;
                 Data::Logarithm log;
+                Data::ElementsContentUnits elementsContentUnits;
                 int threadsNumber;
             };
             struct CalculationThreadInput
@@ -86,6 +92,12 @@ namespace ACL
                 double ipSqrtRange = 0;
                 double ipIntervalLength = 0;
                 double ipSqrtIntervalLength = 0;
+                double ipSkewnessOfDataset = 0;
+                double ipSqrtSkewnessOfDataset = 0;
+                double ipExcessKurtosisOfDataset = 0;
+                double ipSqrtExcessKurtosisOfDataset = 0;
+                double ipMeanSquareError = 0;
+                double ipSqrtMeanSquareError = 0;
                 std::vector<double> ipIntervalMinimum;
                 std::vector<double> ipSqrtIntervalMinimum;
                 std::vector<double> ipIntervalMaximum;
