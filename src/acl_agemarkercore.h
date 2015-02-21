@@ -32,19 +32,14 @@ namespace ACL
             void calculationFinished(ACL::Data::CalculationResult result);
 
         private slots:
-            void collectThreadResult(Data::IpValuesMap result);
+            void collectThreadResult(Data::Types::IpValuesMap result);
 
         private:
             void calculateAtoms();
-            ACL::Data::CalculationResult getCalculationResult();
             std::vector<CalculationThread *> threads;
-            Data::IpValuesMap calculatedIp;
+            Data::Types::IpValuesMap calculatedIp;
             Data::CalculationInput data;
-            std::vector<double> elementsNewContent;
-            std::vector<uint64_t> atomAllEight;
-            std::vector<uint64_t> atomAll;
-            uint64_t atomAllEightSum = 0;
-            uint64_t atomAllSum = 0;
+            Data::Structs::CalculationAtomData atoms;
             int runningThreads;
     };
 }

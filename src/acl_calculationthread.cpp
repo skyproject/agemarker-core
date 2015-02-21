@@ -11,8 +11,8 @@
 
 using namespace ACL;
 
-CalculationThread::CalculationThread(Data::CalculationThreadInput input,
-                                     Data::CalculationThreadShared shared)
+CalculationThread::CalculationThread(Data::Structs::CalculationThreadInput input,
+                                     Data::Structs::CalculationThreadShared shared)
 {
     this->threadInput = input;
     this->threadData = shared;
@@ -54,7 +54,7 @@ void CalculationThread::run()
 {
     std::vector<double> input = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     uint64_t atomicWeightSelector, atomicWeightIterator;
-    Data::IpValuesMap ipMap;
+    Data::Types::IpValuesMap ipMap;
     for (uint64_t l = this->threadInput.startIteration;
          l < this->threadInput.endIteration; ++l)
     {
@@ -98,6 +98,7 @@ void CalculationThread::run()
             }
             input[8] += input[input_it];
         }
+        std::random_shuffle(input.begin(), input.end());
         double ip = Math::roundDouble(Math::ip(input, this->threadInput.logarithm), this->threadInput.decimalPrecision);
         std::map<double, uint64_t>::iterator it = ipMap.find(ip);
         if (it != ipMap.end())

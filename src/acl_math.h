@@ -16,7 +16,8 @@ namespace ACL
     class AGEMARKERCORESHARED_EXPORT Math
     {
         public:
-            static double ip(std::vector<double> input, Data::Logarithm log);
+            static double ip(std::vector<double> input,
+                             Data::Logarithm log);
             static double roundDouble(double source, int decimals);
     };
 }

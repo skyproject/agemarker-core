@@ -22,19 +22,20 @@ namespace ACL
             Q_OBJECT
 
         public:
-            CalculationThread(Data::CalculationThreadInput input, Data::CalculationThreadShared shared);
+            CalculationThread(Data::Structs::CalculationThreadInput input,
+                              Data::Structs::CalculationThreadShared shared);
             ~CalculationThread();
             void pauseThread();
             void resumeThread();
             void removeThread();
 
         signals:
-            void threadCalculationFinished(Data::IpValuesMap calculatedIpValues);
+            void threadCalculationFinished(Data::Types::IpValuesMap calculatedIpValues);
 
         private:
             void run();
-            Data::CalculationThreadInput threadInput;
-            Data::CalculationThreadShared threadData;
+            Data::Structs::CalculationThreadInput threadInput;
+            Data::Structs::CalculationThreadShared threadData;
             QMutex syncMutex;
             QWaitCondition pauseCond;
             bool pause = false;
