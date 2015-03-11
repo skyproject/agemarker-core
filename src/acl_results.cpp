@@ -1,7 +1,16 @@
+/*
+ * Copyright (c) 2013 Mikhail Labushev.
+ *
+ * This file is a part of agemarker-core
+ * library distributed under the MIT License.
+ * For full terms see LICENSE file.
+ */
+
 #include "acl_results.h"
 #include "acl_math.h"
 
 using namespace ACL;
+using namespace boost;
 
 Results::Results(Data::CalculationInput inputData, Data::Structs::CalculationAtomData atomData,
                  Data::Types::IpValuesMap ipValues)
@@ -30,7 +39,7 @@ Data::CalculationResult Results::getCalculationResults()
          iter != this->calculatedIp.end(); ++iter)
     {
         r.ip.push_back(iter->first);
-        r.ipSqrt.push_back(Math::roundDouble(std::sqrt(iter->first), this->data.decimalPrecision));
+        r.ipSqrt.push_back(Math::roundFloat128(multiprecision::sqrt(iter->first), this->data.decimalPrecision));
         r.ipFrequency.push_back(iter->second);
     }
 
@@ -85,8 +94,8 @@ Data::CalculationResult Results::calculateStatistics(ACL::Data::CalculationResul
     uint64_t atomAllSumPopulation = std::accumulate(r.ipTheoreticalFrequency.begin(),
                                                     r.ipTheoreticalFrequency.end(), 0);
 
-    Data::Types::StatisticalDouble ipSum;
-    Data::Types::StatisticalDouble ipSqrtSum;
+    Data::Types::StatisticalFloat128 ipSum;
+    Data::Types::StatisticalFloat128 ipSqrtSum;
 
     for (int x = 0; x < this->numberOfIpValues; ++x)
     {
@@ -104,36 +113,36 @@ Data::CalculationResult Results::calculateStatistics(ACL::Data::CalculationResul
 
     for (int x = 0; x < this->numberOfIpValues; ++x)
     {
-        r.ipSqrtVariance.sample += (std::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 2) * r.ipFrequency[x]);
-        r.ipSqrtVariance.population += (std::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 2) * r.ipTheoreticalFrequency[x]);
+        r.ipSqrtVariance.sample += (multiprecision::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 2) * r.ipFrequency[x]);
+        r.ipSqrtVariance.population += (multiprecision::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 2) * r.ipTheoreticalFrequency[x]);
 
-        r.ipVariance.sample += (std::pow((r.ip[x] - r.ipAverage.sample), 2) * r.ipFrequency[x]);
-        r.ipVariance.population += (std::pow((r.ip[x] - r.ipAverage.population), 2) * r.ipTheoreticalFrequency[x]);
+        r.ipVariance.sample += (multiprecision::pow((r.ip[x] - r.ipAverage.sample), 2) * r.ipFrequency[x]);
+        r.ipVariance.population += (multiprecision::pow((r.ip[x] - r.ipAverage.population), 2) * r.ipTheoreticalFrequency[x]);
 
-        r.ipSqrtSkewnessOfDataset.sample += (std::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 3) * r.ipFrequency[x]);
-        r.ipSqrtSkewnessOfDataset.population += (std::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 3) * r.ipTheoreticalFrequency[x]);
+        r.ipSqrtSkewnessOfDataset.sample += (multiprecision::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 3) * r.ipFrequency[x]);
+        r.ipSqrtSkewnessOfDataset.population += (multiprecision::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 3) * r.ipTheoreticalFrequency[x]);
 
-        r.ipSkewnessOfDataset.sample += (std::pow((r.ip[x] - r.ipAverage.sample), 3) * r.ipFrequency[x]);
-        r.ipSkewnessOfDataset.population += (std::pow((r.ip[x] - r.ipAverage.population), 3) * r.ipTheoreticalFrequency[x]);
+        r.ipSkewnessOfDataset.sample += (multiprecision::pow((r.ip[x] - r.ipAverage.sample), 3) * r.ipFrequency[x]);
+        r.ipSkewnessOfDataset.population += (multiprecision::pow((r.ip[x] - r.ipAverage.population), 3) * r.ipTheoreticalFrequency[x]);
 
-        r.ipSqrtExcessKurtosisOfDataset.sample += (std::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 4) * r.ipFrequency[x]);
-        r.ipSqrtExcessKurtosisOfDataset.population += (std::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 4) * r.ipTheoreticalFrequency[x]);
+        r.ipSqrtExcessKurtosisOfDataset.sample += (multiprecision::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 4) * r.ipFrequency[x]);
+        r.ipSqrtExcessKurtosisOfDataset.population += (multiprecision::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 4) * r.ipTheoreticalFrequency[x]);
 
-        r.ipExcessKurtosisOfDataset.sample += (std::pow((r.ip[x] - r.ipAverage.sample), 4) * r.ipFrequency[x]);
-        r.ipExcessKurtosisOfDataset.population += (std::pow((r.ip[x] - r.ipAverage.population), 4) * r.ipTheoreticalFrequency[x]);
+        r.ipExcessKurtosisOfDataset.sample += (multiprecision::pow((r.ip[x] - r.ipAverage.sample), 4) * r.ipFrequency[x]);
+        r.ipExcessKurtosisOfDataset.population += (multiprecision::pow((r.ip[x] - r.ipAverage.population), 4) * r.ipTheoreticalFrequency[x]);
     }
 
     r.ipSqrtVariance.sample = (r.ipSqrtVariance.sample / (this->atoms.allSum - 1));
-    r.ipSqrtVariance.population = (r.ipSqrtVariance.population / (atomAllSumPopulation - 1));
+    r.ipSqrtVariance.population = (r.ipSqrtVariance.population / atomAllSumPopulation);
 
     r.ipVariance.sample = (r.ipVariance.sample / (this->atoms.allSum - 1));
-    r.ipVariance.population = (r.ipVariance.population / (atomAllSumPopulation - 1));
+    r.ipVariance.population = (r.ipVariance.population / atomAllSumPopulation);
 
-    r.ipSqrtStandardDeviation.sample = std::sqrt(r.ipSqrtVariance.sample);
-    r.ipSqrtStandardDeviation.population = std::sqrt(r.ipSqrtVariance.population);
+    r.ipSqrtStandardDeviation.sample = multiprecision::sqrt(r.ipSqrtVariance.sample);
+    r.ipSqrtStandardDeviation.population = multiprecision::sqrt(r.ipSqrtVariance.population);
 
-    r.ipStandardDeviation.sample = std::sqrt(r.ipVariance.sample);
-    r.ipStandardDeviation.population = std::sqrt(r.ipVariance.population);
+    r.ipStandardDeviation.sample = multiprecision::sqrt(r.ipVariance.sample);
+    r.ipStandardDeviation.population = multiprecision::sqrt(r.ipVariance.population);
 
     r = calculateSkewnessOfDataset(r);
     r = calculateExcessKurtosis(r);
@@ -150,13 +159,13 @@ Data::CalculationResult Results::calculateIntervals(ACL::Data::CalculationResult
 {
     r.ipRange = (r.ip[(this->numberOfIpValues - 1)] - r.ip[0]);
     r.ipIntervalLength = (r.ipRange / this->data.intervalsNumber);
-    r.ipSqrtRange = (std::sqrt(r.ip[(this->numberOfIpValues - 1)]) - std::sqrt(r.ip[0]));
+    r.ipSqrtRange = (multiprecision::sqrt(r.ip[(this->numberOfIpValues - 1)]) - multiprecision::sqrt(r.ip[0]));
     r.ipSqrtIntervalLength = (r.ipSqrtRange / this->data.intervalsNumber);
 
     for (int x = 0; x < this->data.intervalsNumber; ++x)
     {
         r.ipIntervalMinimum.push_back(r.ip[0] + (r.ipIntervalLength * x));
-        r.ipSqrtIntervalMinimum.push_back(std::sqrt(r.ip[0]) + (r.ipSqrtIntervalLength * x));
+        r.ipSqrtIntervalMinimum.push_back(multiprecision::sqrt(r.ip[0]) + (r.ipSqrtIntervalLength * x));
 
         if (x < (this->data.intervalsNumber - 1))
         {
@@ -205,23 +214,17 @@ Data::CalculationResult Results::calculateSkewnessOfDataset(Data::CalculationRes
     uint64_t atomAllSumPopulation = std::accumulate(r.ipTheoreticalFrequency.begin(),
                                                     r.ipTheoreticalFrequency.end(), 0);
 
-    r.ipSqrtSkewnessOfDataset.sample = (r.ipSqrtSkewnessOfDataset.sample / (std::pow(r.ipSqrtStandardDeviation.sample, 3)));
-    r.ipSqrtSkewnessOfDataset.population = (r.ipSqrtSkewnessOfDataset.population / (std::pow(r.ipSqrtStandardDeviation.population, 3)));
-
-    r.ipSkewnessOfDataset.sample = (r.ipSkewnessOfDataset.sample / (std::pow(r.ipStandardDeviation.sample, 3)));
-    r.ipSkewnessOfDataset.population = (r.ipSkewnessOfDataset.population / (std::pow(r.ipStandardDeviation.population, 3)));
-
-    double denom = ((this->atoms.allSum - 1) * (this->atoms.allSum - 2));
-    double fraction = (this->atoms.allSum / denom);
-
-    double denomPopulation = ((atomAllSumPopulation - 1) * (atomAllSumPopulation - 2));
-    double fractionPopulation = (atomAllSumPopulation / denomPopulation);
-
+    r.ipSqrtSkewnessOfDataset.sample = (r.ipSqrtSkewnessOfDataset.sample / (multiprecision::pow(r.ipSqrtStandardDeviation.sample, 3)));
+    r.ipSkewnessOfDataset.sample = (r.ipSkewnessOfDataset.sample / (multiprecision::pow(r.ipStandardDeviation.sample, 3)));
+    float128 denom = ((this->atoms.allSum - 1) * (this->atoms.allSum - 2));
+    float128 fraction = (this->atoms.allSum / denom);
     r.ipSqrtSkewnessOfDataset.sample = (r.ipSqrtSkewnessOfDataset.sample * fraction);
-    r.ipSqrtSkewnessOfDataset.population = (r.ipSqrtSkewnessOfDataset.population * fractionPopulation);
-
     r.ipSkewnessOfDataset.sample = (r.ipSkewnessOfDataset.sample * fraction);
-    r.ipSkewnessOfDataset.population = (r.ipSkewnessOfDataset.population * fractionPopulation);
+
+    r.ipSqrtSkewnessOfDataset.population = (r.ipSqrtSkewnessOfDataset.population / (multiprecision::pow(r.ipSqrtStandardDeviation.population, 3)));
+    r.ipSkewnessOfDataset.population = (r.ipSkewnessOfDataset.population / (multiprecision::pow(r.ipStandardDeviation.population, 3)));
+    r.ipSqrtSkewnessOfDataset.population = (r.ipSqrtSkewnessOfDataset.population / atomAllSumPopulation);
+    r.ipSkewnessOfDataset.population = (r.ipSkewnessOfDataset.population / atomAllSumPopulation);
 
     return r;
 }
@@ -231,49 +234,39 @@ Data::CalculationResult Results::calculateExcessKurtosis(Data::CalculationResult
     uint64_t atomAllSumPopulation = std::accumulate(r.ipTheoreticalFrequency.begin(),
                                                     r.ipTheoreticalFrequency.end(), 0);
 
-    r.ipSqrtExcessKurtosisOfDataset.sample = (r.ipSqrtExcessKurtosisOfDataset.sample / (std::pow(r.ipSqrtStandardDeviation.sample, 4)));
-    r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population / (std::pow(r.ipSqrtStandardDeviation.population, 4)));\
+    r.ipSqrtExcessKurtosisOfDataset.sample = (r.ipSqrtExcessKurtosisOfDataset.sample / (multiprecision::pow(r.ipSqrtStandardDeviation.sample, 4)));
+    r.ipExcessKurtosisOfDataset.sample = (r.ipExcessKurtosisOfDataset.sample / (multiprecision::pow(r.ipStandardDeviation.sample, 4)));
 
-    r.ipExcessKurtosisOfDataset.sample = (r.ipExcessKurtosisOfDataset.sample / (std::pow(r.ipStandardDeviation.sample, 4)));
-    r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population / (std::pow(r.ipStandardDeviation.population, 4)));
+    float128 x0 = (this->atoms.allSum + 1);
+    float128 x1 = (this->atoms.allSum - 1);
+    float128 x2 = (this->atoms.allSum - 2);
+    float128 x3 = (this->atoms.allSum - 3);
 
-    double x0 = (this->atoms.allSum + 1);
-    double x1 = (this->atoms.allSum - 1);
-    double x2 = (this->atoms.allSum - 2);
-    double x3 = (this->atoms.allSum - 3);
-
-    double num = (this->atoms.allSum * x0);
-    double denom = (x1 * x2 * x3);
-    double fraction = (num / denom);
+    float128 num = (this->atoms.allSum * x0);
+    float128 denom = (x1 * x2 * x3);
+    float128 fraction = (num / denom);
 
     x0 = (atomAllSumPopulation + 1);
     x1 = (atomAllSumPopulation - 1);
     x2 = (atomAllSumPopulation - 2);
     x3 = (atomAllSumPopulation - 3);
 
-    double numPopulation = (atomAllSumPopulation * x0);
-    double denomPopulation = (x1 * x2 * x3);
-    double fractionPopulation = (numPopulation / denomPopulation);
-
     r.ipSqrtExcessKurtosisOfDataset.sample = (r.ipSqrtExcessKurtosisOfDataset.sample * fraction);
-    r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population * fractionPopulation);
-
     r.ipExcessKurtosisOfDataset.sample = (r.ipExcessKurtosisOfDataset.sample * fraction);
-    r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population * fractionPopulation);
 
     num = (3 * (std::pow((this->atoms.allSum - 1), 2)));
     denom = ((this->atoms.allSum - 2) * (this->atoms.allSum - 3));
     fraction = (num / denom);
 
-    numPopulation = (3 * (std::pow((atomAllSumPopulation - 1), 2)));
-    denomPopulation = ((atomAllSumPopulation - 2) * (atomAllSumPopulation - 3));
-    fractionPopulation = (numPopulation / denomPopulation);
-
     r.ipSqrtExcessKurtosisOfDataset.sample = (r.ipSqrtExcessKurtosisOfDataset.sample - fraction);
-    r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population - fractionPopulation);
-
     r.ipExcessKurtosisOfDataset.sample = (r.ipExcessKurtosisOfDataset.sample - fraction);
-    r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population - fractionPopulation);
+
+    r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population / (multiprecision::pow(r.ipSqrtStandardDeviation.population, 4)));
+    r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population / (multiprecision::pow(r.ipStandardDeviation.population, 4)));
+    r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population / atomAllSumPopulation);
+    r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population / atomAllSumPopulation);
+    r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population - 3);
+    r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population - 3);
 
     return r;
 }

@@ -15,12 +15,16 @@
 /* The number of oxides used in Agemarker calculations */
 #define OXIDES_COUNT            53
 
+#include <boost/multiprecision/float128.hpp>
+
 #include <atomic>
 #include <vector>
 #include <map>
 
 #include "acl_mtrandom.h"
 #include "acl_global.h"
+
+using namespace boost::multiprecision;
 
 namespace ACL
 {
@@ -149,16 +153,16 @@ namespace ACL
                 }
             };
             typedef StatisticalValue<uint64_t> StatisticalUInt64;
-            typedef StatisticalValue<double> StatisticalDouble;
+            typedef StatisticalValue<float128> StatisticalFloat128;
 
-            typedef std::map<double, uint64_t> IpValuesMap;
+            typedef std::map<float128, uint64_t> IpValuesMap;
         }
         /* Data structs used _internally_ in Agemarker Core Library. */
         namespace Structs
         {
             struct CalculationAtomData
             {
-                std::vector<double> elementsNewContent;
+                std::vector<float128> elementsNewContent;
                 std::vector<uint64_t> allEight;
                 std::vector<uint64_t> all;
                 uint64_t allEightSum = 0;
@@ -166,7 +170,7 @@ namespace ACL
             };
             struct CalculationThreadInput
             {
-                std::vector<double> elementsWeight;
+                std::vector<float128> elementsWeight;
                 std::vector<uint64_t> atomAllEight;
                 Logarithm logarithm;
                 uint64_t atomAllEightSum;
@@ -193,9 +197,9 @@ namespace ACL
         }
         struct CalculationInput
         {
-            std::vector<double> oxidesContent;
-            std::vector<double> elementsContent;
-            std::vector<double> elementsWeight;
+            std::vector<float128> oxidesContent;
+            std::vector<float128> elementsContent;
+            std::vector<float128> elementsWeight;
             int decimalPrecision;
             uint64_t multiplier;
             int intervalsNumber;
@@ -207,33 +211,33 @@ namespace ACL
         {
             CalculationInput calculationInput;
             std::vector<uint64_t> atoms;
-            std::vector<double> ip;
-            std::vector<double> ipSqrt;
+            std::vector<float128> ip;
+            std::vector<float128> ipSqrt;
             std::vector<uint64_t> ipFrequency;
             std::vector<uint64_t> ipTheoreticalFrequency;
             uint64_t atomsSum;
-            Types::StatisticalDouble ipAverage;
-            Types::StatisticalDouble ipSqrtAverage;
-            Types::StatisticalDouble ipVariance;
-            Types::StatisticalDouble ipSqrtVariance;
-            Types::StatisticalDouble ipStandardDeviation;
-            Types::StatisticalDouble ipSqrtStandardDeviation;
-            Types::StatisticalDouble ipSkewnessOfDataset;
-            Types::StatisticalDouble ipSqrtSkewnessOfDataset;
-            Types::StatisticalDouble ipExcessKurtosisOfDataset;
-            Types::StatisticalDouble ipSqrtExcessKurtosisOfDataset;
-            double ipMeanSquareError;
-            double ipSqrtMeanSquareError;
-            double ipRange;
-            double ipSqrtRange;
-            double ipIntervalLength;
-            double ipSqrtIntervalLength;
-            std::vector<double> ipIntervalMinimum;
-            std::vector<double> ipSqrtIntervalMinimum;
-            std::vector<double> ipIntervalMaximum;
-            std::vector<double> ipSqrtIntervalMaximum;
-            std::vector<double> ipIntervalCenter;
-            std::vector<double> ipSqrtIntervalCenter;
+            Types::StatisticalFloat128 ipAverage;
+            Types::StatisticalFloat128 ipSqrtAverage;
+            Types::StatisticalFloat128 ipVariance;
+            Types::StatisticalFloat128 ipSqrtVariance;
+            Types::StatisticalFloat128 ipStandardDeviation;
+            Types::StatisticalFloat128 ipSqrtStandardDeviation;
+            Types::StatisticalFloat128 ipSkewnessOfDataset;
+            Types::StatisticalFloat128 ipSqrtSkewnessOfDataset;
+            Types::StatisticalFloat128 ipExcessKurtosisOfDataset;
+            Types::StatisticalFloat128 ipSqrtExcessKurtosisOfDataset;
+            float128 ipMeanSquareError;
+            float128 ipSqrtMeanSquareError;
+            float128 ipRange;
+            float128 ipSqrtRange;
+            float128 ipIntervalLength;
+            float128 ipSqrtIntervalLength;
+            std::vector<float128> ipIntervalMinimum;
+            std::vector<float128> ipSqrtIntervalMinimum;
+            std::vector<float128> ipIntervalMaximum;
+            std::vector<float128> ipSqrtIntervalMaximum;
+            std::vector<float128> ipIntervalCenter;
+            std::vector<float128> ipSqrtIntervalCenter;
             std::vector<Types::StatisticalUInt64> ipIntervalCount;
             std::vector<Types::StatisticalUInt64> ipSqrtIntervalCount;
         };

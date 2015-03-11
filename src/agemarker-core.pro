@@ -6,7 +6,7 @@
 
 QT       -= gui
 
-QMAKE_CXXFLAGS += -std=c++0x
+QMAKE_CXXFLAGS += -std=gnu++0x
 QMAKE_CXXFLAGS_RELEASE += -O2
 
 TARGET = agemarker-core
@@ -31,6 +31,11 @@ HEADERS += acl_global.h \
            acl_calculationthread.h \
            acl_results.h \
            acl_atoms.h
+
+
+LIBS += -lquadmath
+
+INCLUDEPATH += $$quote(c:/Users/mlabu_000.RESONANS-PC/Documents/Libs)
 
 
 unix:!symbian {

@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2013 Mikhail Labushev.
+ *
+ * This file is a part of agemarker-core
+ * library distributed under the MIT License.
+ * For full terms see LICENSE file.
+ */
+
 #include "acl_atoms.h"
 
 using namespace ACL;
@@ -16,7 +24,7 @@ Atoms::~Atoms()
 
 Data::Structs::CalculationAtomData Atoms::getAtomData()
 {
-    double oxidesWeightSum[OXIDES_COUNT];
+    float128 oxidesWeightSum[OXIDES_COUNT];
     oxidesWeightSum[0] = ((this->data.elementsWeight[13] * 1) + (this->data.elementsWeight[7] * 2));
     oxidesWeightSum[1] = ((this->data.elementsWeight[21] * 1) + (this->data.elementsWeight[7] * 2));
     oxidesWeightSum[2] = ((this->data.elementsWeight[12] * 2) + (this->data.elementsWeight[7] * 3));
@@ -70,7 +78,7 @@ Data::Structs::CalculationAtomData Atoms::getAtomData()
     oxidesWeightSum[50] = ((this->data.elementsWeight[43] * 1) + (this->data.elementsWeight[7] * 2));
     oxidesWeightSum[51] = ((this->data.elementsWeight[54] * 2) + (this->data.elementsWeight[7] * 1));
     oxidesWeightSum[52] = ((this->data.elementsWeight[36] * 2) + (this->data.elementsWeight[7] * 1));
-    double oxidesPureElement[OXIDES_COUNT];
+    float128 oxidesPureElement[OXIDES_COUNT];
     oxidesPureElement[0] = ((this->data.elementsWeight[13] * 1) * (this->data.oxidesContent[0]) / (oxidesWeightSum[0]));
     oxidesPureElement[1] = ((this->data.elementsWeight[21] * 1) * (this->data.oxidesContent[1]) / (oxidesWeightSum[1]));
     oxidesPureElement[2] = ((this->data.elementsWeight[12] * 2) * (this->data.oxidesContent[2]) / (oxidesWeightSum[2]));
@@ -179,12 +187,12 @@ Data::Structs::CalculationAtomData Atoms::getAtomData()
     this->atoms.elementsNewContent[36] += oxidesPureElement[52];
     for (int x = 0; x < OXIDES_COUNT; ++x)
     {
-        double oxideOxygen = ((this->data.oxidesContent[x]) - (oxidesPureElement[x]));
+        float128 oxideOxygen = ((this->data.oxidesContent[x]) - (oxidesPureElement[x]));
         this->atoms.elementsNewContent[7] += oxideOxygen;
     }
     for (int x = 0; x < ELEMENTS_COUNT; ++x)
     {
-        double nor;
+        float128 nor;
         if (this->data.elementsContentUnits == Data::ElementsContentUnits::MassPercent)
         {
             nor = (this->atoms.elementsNewContent[x] / this->data.elementsWeight[x]);
@@ -193,7 +201,10 @@ Data::Structs::CalculationAtomData Atoms::getAtomData()
         {
             nor = this->atoms.elementsNewContent[x];
         }
-        this->atoms.all.push_back(nor * this->data.multiplier);
+
+        float128 atom = boost::multiprecision::round(nor * this->data.multiplier);
+        this->atoms.all.push_back(boost::numeric_cast<uint64_t>(atom));
+
         this->atoms.allSum += atoms.all[x];
         this->atoms.allEight.push_back(atoms.all[x] * 8);
         this->atoms.allEightSum += this->atoms.allEight[x];
