@@ -9,8 +9,10 @@
 #ifndef ACL_FLOAT
 #define ACL_FLOAT
 
+#include <boost/shared_ptr.hpp>
 #include <boost/multiprecision/float128.hpp>
 
+/* Float-to-string conversion */
 #include <QString>
 #include <sstream>
 #include <string>
@@ -33,30 +35,27 @@ namespace ACL
         /* A quick Google search didn't yield any pre-made
          * solutions, so we have to invent something resembling
          * a wheel here.
-         * Pointers make memory-management a headache, but they
-         * seem like an "obvious" solution for type switching.
-         * It is not quite clean, but it works nonetheless.
          *
-         * Okay, scratch that. The current code is an abomination
-         * and needs to be fixed asap. The pointers are used only
-         * as not to store two scoped variables (both "double"
-         * and "float128") in memory at the same time.
-         * Is all this mess really worth those few bytes?
+         * The smart pointers are used only as not to store two
+         * scoped variables (both "double" and "float128") in memory
+         * at the same time.
+         *
+         * TODO: Clean up.
          */
         public:
             Float()
             {
                 /* The default data type is double */
-                this->valueD = new double;
+                this->valueD.reset(new double);
             }
             Float(float128 f128)
             {
-                this->valueF128 = new float128;
+                this->valueF128.reset(new float128);
                 *this->valueF128 = f128;
             }
             Float(double d)
             {
-                this->valueD = new double;
+                this->valueD.reset(new double);
                 *this->valueD = d;
             }
             Float(QString string, int precision)
@@ -68,25 +67,13 @@ namespace ACL
                 }
                 else
                 {
-                    *this->valueF128 = boost::numeric_cast<float128>(string.toStdString());
-                }
-            }
-            ~Float()
-            {
-                if (valueD != nullptr)
-                {
-                    delete valueD;
-                    valueD = nullptr;
-                }
-                if (valueF128 != nullptr)
-                {
-                    delete [] valueF128;
-                    valueF128 = nullptr;
+                    *this->valueF128 = boost::numeric_cast<float128>
+                                       (string.toStdString());
                 }
             }
             bool isDouble() const
             {
-                if (valueD != nullptr)
+                if (valueD)
                 {
                     return true;
                 }
@@ -107,21 +94,13 @@ namespace ACL
                  * losing precision. */
                 if (precision > 12)
                 {
-                    valueF128 = new float128;
-                    if (valueD != nullptr)
-                    {
-                        delete valueD;
-                        valueD = nullptr;
-                    }
+                    valueF128.reset(new float128);
+                    valueD.reset();
                 }
                 else
                 {
-                    this->valueD = new double;
-                    if (valueF128 != nullptr)
-                    {
-                        delete valueF128;
-                        valueF128 = nullptr;
-                    }
+                    valueD.reset(new double);
+                    valueF128.reset();
                 }
             }
             QString toString(int precision)
@@ -157,7 +136,8 @@ namespace ACL
                     }
                     else
                     {
-                        *this->valueD += boost::numeric_cast<double>(*v.valueF128);
+                        *this->valueD += boost::numeric_cast<double>
+                                         (*v.valueF128);
                     }
                 }
                 else
@@ -183,7 +163,8 @@ namespace ACL
                     }
                     else
                     {
-                        *this->valueD += boost::numeric_cast<double>(*v.valueF128);
+                        *this->valueD += boost::numeric_cast<double>
+                                         (*v.valueF128);
                     }
                 }
                 else
@@ -209,7 +190,8 @@ namespace ACL
                     }
                     else
                     {
-                        *this->valueD -= boost::numeric_cast<double>(*v.valueF128);
+                        *this->valueD -= boost::numeric_cast<double>
+                                         (*v.valueF128);
                     }
                 }
                 else
@@ -235,7 +217,8 @@ namespace ACL
                     }
                     else
                     {
-                        *this->valueD *= boost::numeric_cast<double>(*v.valueF128);
+                        *this->valueD *= boost::numeric_cast<double>
+                                         (*v.valueF128);
                     }
                 }
                 else
@@ -261,7 +244,8 @@ namespace ACL
                     }
                     else
                     {
-                        *this->valueD /= boost::numeric_cast<double>(*v.valueF128);
+                        *this->valueD /= boost::numeric_cast<double>
+                                         (*v.valueF128);
                     }
                 }
                 else
@@ -287,7 +271,8 @@ namespace ACL
                     }
                     else
                     {
-                        *this->valueD = boost::numeric_cast<double>(*v.valueF128);
+                        *this->valueD = boost::numeric_cast<double>
+                                        (*v.valueF128);
                     }
                 }
                 else
@@ -419,8 +404,10 @@ namespace ACL
             }
 
         private:
-            float128 *valueF128 = nullptr;
-            double *valueD = nullptr;
+            boost::shared_ptr<boost::multiprecision::float128> valueF128 =
+                    boost::shared_ptr<boost::multiprecision::float128>(nullptr);
+            boost::shared_ptr<double> valueD =
+                    boost::shared_ptr<double>(nullptr);
     };
 
     /* Due to the way Float is implemented at the moment,
@@ -444,9 +431,11 @@ namespace ACL
              {
                 if (v.isDouble() == true)
                 {
-                    return Float(std::ceil((v.getDouble() * std::pow(10, precision)) - 0.49) / std::pow(10, precision));
+                    return Float(std::ceil((v.getDouble() * std::pow(10, precision)) - 0.49)
+                                 / std::pow(10, precision));
                 }
-                return Float(boost::multiprecision::ceil((v.getF128() * std::pow(10, precision)) - 0.49Q) / std::pow(10, precision));
+                return Float(boost::multiprecision::ceil((v.getF128() * std::pow(10, precision)) - 0.49Q)
+                             / std::pow(10, precision));
              }
              template <typename T>
              static Float pow(Float v, T raise)
