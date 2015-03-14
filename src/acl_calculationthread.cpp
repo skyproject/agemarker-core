@@ -52,7 +52,7 @@ void CalculationThread::removeThread()
 
 void CalculationThread::run()
 {
-    std::vector<float128> input = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    std::vector<Float> input = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     uint64_t atomicWeightSelector, atomicWeightIterator;
     Data::Types::IpValuesMap ipMap;
     for (uint64_t l = this->threadInput.startIteration;
@@ -99,15 +99,15 @@ void CalculationThread::run()
             input[8] += input[input_it];
         }
         std::random_shuffle(input.begin(), input.end());
-        float128 ip = Math::roundFloat128(Math::ip(input, this->threadInput.logarithm), this->threadInput.decimalPrecision);
-        std::map<float128, uint64_t>::iterator it = ipMap.find(ip);
+        Float ip = FMath::round(Math::ip(input, this->threadInput.logarithm), this->threadInput.decimalPrecision);
+        std::map<Float, uint64_t>::iterator it = ipMap.find(ip);
         if (it != ipMap.end())
         {
             it->second += 1;
         }
         else
         {
-            ipMap.insert(std::pair<float128, uint64_t>(ip, 1));
+            ipMap.insert(std::pair<Float, uint64_t>(ip, 1));
         }
     }
     emit threadCalculationFinished(ipMap);

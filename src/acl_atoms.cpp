@@ -24,7 +24,7 @@ Atoms::~Atoms()
 
 Data::Structs::CalculationAtomData Atoms::getAtomData()
 {
-    float128 oxidesWeightSum[OXIDES_COUNT];
+    Float oxidesWeightSum[OXIDES_COUNT];
     oxidesWeightSum[0] = ((this->data.elementsWeight[13] * 1) + (this->data.elementsWeight[7] * 2));
     oxidesWeightSum[1] = ((this->data.elementsWeight[21] * 1) + (this->data.elementsWeight[7] * 2));
     oxidesWeightSum[2] = ((this->data.elementsWeight[12] * 2) + (this->data.elementsWeight[7] * 3));
@@ -78,7 +78,7 @@ Data::Structs::CalculationAtomData Atoms::getAtomData()
     oxidesWeightSum[50] = ((this->data.elementsWeight[43] * 1) + (this->data.elementsWeight[7] * 2));
     oxidesWeightSum[51] = ((this->data.elementsWeight[54] * 2) + (this->data.elementsWeight[7] * 1));
     oxidesWeightSum[52] = ((this->data.elementsWeight[36] * 2) + (this->data.elementsWeight[7] * 1));
-    float128 oxidesPureElement[OXIDES_COUNT];
+    Float oxidesPureElement[OXIDES_COUNT];
     oxidesPureElement[0] = ((this->data.elementsWeight[13] * 1) * (this->data.oxidesContent[0]) / (oxidesWeightSum[0]));
     oxidesPureElement[1] = ((this->data.elementsWeight[21] * 1) * (this->data.oxidesContent[1]) / (oxidesWeightSum[1]));
     oxidesPureElement[2] = ((this->data.elementsWeight[12] * 2) * (this->data.oxidesContent[2]) / (oxidesWeightSum[2]));
@@ -187,12 +187,12 @@ Data::Structs::CalculationAtomData Atoms::getAtomData()
     this->atoms.elementsNewContent[36] += oxidesPureElement[52];
     for (int x = 0; x < OXIDES_COUNT; ++x)
     {
-        float128 oxideOxygen = ((this->data.oxidesContent[x]) - (oxidesPureElement[x]));
+        Float oxideOxygen = ((this->data.oxidesContent[x]) - (oxidesPureElement[x]));
         this->atoms.elementsNewContent[7] += oxideOxygen;
     }
     for (int x = 0; x < ELEMENTS_COUNT; ++x)
     {
-        float128 nor;
+        Float nor;
         if (this->data.elementsContentUnits == Data::ElementsContentUnits::MassPercent)
         {
             nor = (this->atoms.elementsNewContent[x] / this->data.elementsWeight[x]);
@@ -202,8 +202,8 @@ Data::Structs::CalculationAtomData Atoms::getAtomData()
             nor = this->atoms.elementsNewContent[x];
         }
 
-        float128 atom = boost::multiprecision::round(nor * this->data.multiplier);
-        this->atoms.all.push_back(boost::numeric_cast<uint64_t>(atom));
+        Float atom = FMath::round(nor * this->data.multiplier);
+        this->atoms.all.push_back(FMath::boost_numeric_cast<uint64_t>(atom));
 
         this->atoms.allSum += atoms.all[x];
         this->atoms.allEight.push_back(atoms.all[x] * 8);

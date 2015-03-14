@@ -11,13 +11,13 @@
 using namespace ACL;
 using namespace boost;
 
-float128 Math::ip(std::vector<float128> input, Data::Logarithm log)
+Float Math::ip(std::vector<Float> input, Data::Logarithm log)
 {
-    float128 rowSum[3];
-    float128 columnSum[3];
-    float128 rowsTotalSum = 0;
-    float128 rowsUncertaintyTotal = 0;
-    float128 columnsUncertaintyTotal = 0;
+    Float rowSum[3];
+    Float columnSum[3];
+    Float rowsTotalSum = 0;
+    Float rowsUncertaintyTotal = 0;
+    Float columnsUncertaintyTotal = 0;
     for (int x = 0; x < 3; ++x)
     {
         columnSum[x] = input[x] + input[(x + 3)] + input[(x + 6)];
@@ -32,12 +32,12 @@ float128 Math::ip(std::vector<float128> input, Data::Logarithm log)
         {
             if (rowSum[x] > 0)
             {
-                rowSum[x] = multiprecision::abs((rowSum[x] / rowsTotalSum) * multiprecision::log(rowSum[x] / rowsTotalSum));
+                rowSum[x] = FMath::abs((rowSum[x] / rowsTotalSum) * FMath::log(rowSum[x] / rowsTotalSum));
                 rowsUncertaintyTotal += rowSum[x];
             }
             if (columnSum[x] > 0)
             {
-                columnSum[x] = multiprecision::abs((columnSum[x] / rowsTotalSum) * multiprecision::log(columnSum[x] / rowsTotalSum));
+                columnSum[x] = FMath::abs((columnSum[x] / rowsTotalSum) * FMath::log(columnSum[x] / rowsTotalSum));
                 columnsUncertaintyTotal += columnSum[x];
             }
         }
@@ -48,24 +48,24 @@ float128 Math::ip(std::vector<float128> input, Data::Logarithm log)
         {
             if (rowSum[x] > 0)
             {
-                rowSum[x] = multiprecision::abs((rowSum[x] / rowsTotalSum) * multiprecision::log10(rowSum[x] / rowsTotalSum));
+                rowSum[x] = FMath::abs((rowSum[x] / rowsTotalSum) * FMath::log10(rowSum[x] / rowsTotalSum));
                 rowsUncertaintyTotal += rowSum[x];
             }
             if (columnSum[x] > 0)
             {
-                columnSum[x] = multiprecision::abs((columnSum[x] / rowsTotalSum) * multiprecision::log10(columnSum[x] / rowsTotalSum));
+                columnSum[x] = FMath::abs((columnSum[x] / rowsTotalSum) * FMath::log10(columnSum[x] / rowsTotalSum));
                 columnsUncertaintyTotal += columnSum[x];
             }
         }
     }
-    float128 kab = 0;
+    Float kab = 0;
     if (log == Data::Logarithm::Natural)
     {
         for (int x = 0; x < 9; ++x)
         {
             if (input[x] > 0)
             {
-                kab += multiprecision::abs(input[x] / rowsTotalSum * multiprecision::log(input[x] / rowsTotalSum));
+                kab += FMath::abs(input[x] / rowsTotalSum * FMath::log(input[x] / rowsTotalSum));
             }
         }
     }
@@ -75,14 +75,9 @@ float128 Math::ip(std::vector<float128> input, Data::Logarithm log)
         {
             if (input[x] > 0)
             {
-                kab += multiprecision::abs(input[x] / rowsTotalSum * multiprecision::log10(input[x] / rowsTotalSum));
+                kab += FMath::abs(input[x] / rowsTotalSum * FMath::log10(input[x] / rowsTotalSum));
             }
         }
     }
     return (rowsUncertaintyTotal + columnsUncertaintyTotal - kab);
-}
-
-float128 Math::roundFloat128(float128 source, int decimals)
-{
-    return multiprecision::ceil((source * std::pow(10, decimals)) - 0.49Q) / std::pow(10, decimals);
 }

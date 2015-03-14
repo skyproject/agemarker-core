@@ -39,7 +39,7 @@ Data::CalculationResult Results::getCalculationResults()
          iter != this->calculatedIp.end(); ++iter)
     {
         r.ip.push_back(iter->first);
-        r.ipSqrt.push_back(Math::roundFloat128(multiprecision::sqrt(iter->first), this->data.decimalPrecision));
+        r.ipSqrt.push_back(FMath::round(FMath::sqrt(iter->first), this->data.decimalPrecision));
         r.ipFrequency.push_back(iter->second);
     }
 
@@ -94,8 +94,8 @@ Data::CalculationResult Results::calculateStatistics(ACL::Data::CalculationResul
     uint64_t atomAllSumPopulation = std::accumulate(r.ipTheoreticalFrequency.begin(),
                                                     r.ipTheoreticalFrequency.end(), 0);
 
-    Data::Types::StatisticalFloat128 ipSum;
-    Data::Types::StatisticalFloat128 ipSqrtSum;
+    Data::Types::StatisticalFloat ipSum;
+    Data::Types::StatisticalFloat ipSqrtSum;
 
     for (int x = 0; x < this->numberOfIpValues; ++x)
     {
@@ -113,23 +113,23 @@ Data::CalculationResult Results::calculateStatistics(ACL::Data::CalculationResul
 
     for (int x = 0; x < this->numberOfIpValues; ++x)
     {
-        r.ipSqrtVariance.sample += (multiprecision::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 2) * r.ipFrequency[x]);
-        r.ipSqrtVariance.population += (multiprecision::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 2) * r.ipTheoreticalFrequency[x]);
+        r.ipSqrtVariance.sample += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 2) * r.ipFrequency[x]);
+        r.ipSqrtVariance.population += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 2) * r.ipTheoreticalFrequency[x]);
 
-        r.ipVariance.sample += (multiprecision::pow((r.ip[x] - r.ipAverage.sample), 2) * r.ipFrequency[x]);
-        r.ipVariance.population += (multiprecision::pow((r.ip[x] - r.ipAverage.population), 2) * r.ipTheoreticalFrequency[x]);
+        r.ipVariance.sample += (FMath::pow((r.ip[x] - r.ipAverage.sample), 2) * r.ipFrequency[x]);
+        r.ipVariance.population += (FMath::pow((r.ip[x] - r.ipAverage.population), 2) * r.ipTheoreticalFrequency[x]);
 
-        r.ipSqrtSkewnessOfDataset.sample += (multiprecision::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 3) * r.ipFrequency[x]);
-        r.ipSqrtSkewnessOfDataset.population += (multiprecision::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 3) * r.ipTheoreticalFrequency[x]);
+        r.ipSqrtSkewnessOfDataset.sample += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 3) * r.ipFrequency[x]);
+        r.ipSqrtSkewnessOfDataset.population += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 3) * r.ipTheoreticalFrequency[x]);
 
-        r.ipSkewnessOfDataset.sample += (multiprecision::pow((r.ip[x] - r.ipAverage.sample), 3) * r.ipFrequency[x]);
-        r.ipSkewnessOfDataset.population += (multiprecision::pow((r.ip[x] - r.ipAverage.population), 3) * r.ipTheoreticalFrequency[x]);
+        r.ipSkewnessOfDataset.sample += (FMath::pow((r.ip[x] - r.ipAverage.sample), 3) * r.ipFrequency[x]);
+        r.ipSkewnessOfDataset.population += (FMath::pow((r.ip[x] - r.ipAverage.population), 3) * r.ipTheoreticalFrequency[x]);
 
-        r.ipSqrtExcessKurtosisOfDataset.sample += (multiprecision::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 4) * r.ipFrequency[x]);
-        r.ipSqrtExcessKurtosisOfDataset.population += (multiprecision::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 4) * r.ipTheoreticalFrequency[x]);
+        r.ipSqrtExcessKurtosisOfDataset.sample += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 4) * r.ipFrequency[x]);
+        r.ipSqrtExcessKurtosisOfDataset.population += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 4) * r.ipTheoreticalFrequency[x]);
 
-        r.ipExcessKurtosisOfDataset.sample += (multiprecision::pow((r.ip[x] - r.ipAverage.sample), 4) * r.ipFrequency[x]);
-        r.ipExcessKurtosisOfDataset.population += (multiprecision::pow((r.ip[x] - r.ipAverage.population), 4) * r.ipTheoreticalFrequency[x]);
+        r.ipExcessKurtosisOfDataset.sample += (FMath::pow((r.ip[x] - r.ipAverage.sample), 4) * r.ipFrequency[x]);
+        r.ipExcessKurtosisOfDataset.population += (FMath::pow((r.ip[x] - r.ipAverage.population), 4) * r.ipTheoreticalFrequency[x]);
     }
 
     r.ipSqrtVariance.sample = (r.ipSqrtVariance.sample / (this->atoms.allSum - 1));
@@ -138,11 +138,11 @@ Data::CalculationResult Results::calculateStatistics(ACL::Data::CalculationResul
     r.ipVariance.sample = (r.ipVariance.sample / (this->atoms.allSum - 1));
     r.ipVariance.population = (r.ipVariance.population / atomAllSumPopulation);
 
-    r.ipSqrtStandardDeviation.sample = multiprecision::sqrt(r.ipSqrtVariance.sample);
-    r.ipSqrtStandardDeviation.population = multiprecision::sqrt(r.ipSqrtVariance.population);
+    r.ipSqrtStandardDeviation.sample = FMath::sqrt(r.ipSqrtVariance.sample);
+    r.ipSqrtStandardDeviation.population = FMath::sqrt(r.ipSqrtVariance.population);
 
-    r.ipStandardDeviation.sample = multiprecision::sqrt(r.ipVariance.sample);
-    r.ipStandardDeviation.population = multiprecision::sqrt(r.ipVariance.population);
+    r.ipStandardDeviation.sample = FMath::sqrt(r.ipVariance.sample);
+    r.ipStandardDeviation.population = FMath::sqrt(r.ipVariance.population);
 
     r = calculateSkewnessOfDataset(r);
     r = calculateExcessKurtosis(r);
@@ -159,13 +159,13 @@ Data::CalculationResult Results::calculateIntervals(ACL::Data::CalculationResult
 {
     r.ipRange = (r.ip[(this->numberOfIpValues - 1)] - r.ip[0]);
     r.ipIntervalLength = (r.ipRange / this->data.intervalsNumber);
-    r.ipSqrtRange = (multiprecision::sqrt(r.ip[(this->numberOfIpValues - 1)]) - multiprecision::sqrt(r.ip[0]));
+    r.ipSqrtRange = (FMath::sqrt(r.ip[(this->numberOfIpValues - 1)]) - FMath::sqrt(r.ip[0]));
     r.ipSqrtIntervalLength = (r.ipSqrtRange / this->data.intervalsNumber);
 
     for (int x = 0; x < this->data.intervalsNumber; ++x)
     {
         r.ipIntervalMinimum.push_back(r.ip[0] + (r.ipIntervalLength * x));
-        r.ipSqrtIntervalMinimum.push_back(multiprecision::sqrt(r.ip[0]) + (r.ipSqrtIntervalLength * x));
+        r.ipSqrtIntervalMinimum.push_back(FMath::sqrt(r.ip[0]) + (r.ipSqrtIntervalLength * x));
 
         if (x < (this->data.intervalsNumber - 1))
         {
@@ -214,15 +214,15 @@ Data::CalculationResult Results::calculateSkewnessOfDataset(Data::CalculationRes
     uint64_t atomAllSumPopulation = std::accumulate(r.ipTheoreticalFrequency.begin(),
                                                     r.ipTheoreticalFrequency.end(), 0);
 
-    r.ipSqrtSkewnessOfDataset.sample = (r.ipSqrtSkewnessOfDataset.sample / (multiprecision::pow(r.ipSqrtStandardDeviation.sample, 3)));
-    r.ipSkewnessOfDataset.sample = (r.ipSkewnessOfDataset.sample / (multiprecision::pow(r.ipStandardDeviation.sample, 3)));
+    r.ipSqrtSkewnessOfDataset.sample = (r.ipSqrtSkewnessOfDataset.sample / (FMath::pow(r.ipSqrtStandardDeviation.sample, 3)));
+    r.ipSkewnessOfDataset.sample = (r.ipSkewnessOfDataset.sample / (FMath::pow(r.ipStandardDeviation.sample, 3)));
     float128 denom = ((this->atoms.allSum - 1) * (this->atoms.allSum - 2));
     float128 fraction = (this->atoms.allSum / denom);
     r.ipSqrtSkewnessOfDataset.sample = (r.ipSqrtSkewnessOfDataset.sample * fraction);
     r.ipSkewnessOfDataset.sample = (r.ipSkewnessOfDataset.sample * fraction);
 
-    r.ipSqrtSkewnessOfDataset.population = (r.ipSqrtSkewnessOfDataset.population / (multiprecision::pow(r.ipSqrtStandardDeviation.population, 3)));
-    r.ipSkewnessOfDataset.population = (r.ipSkewnessOfDataset.population / (multiprecision::pow(r.ipStandardDeviation.population, 3)));
+    r.ipSqrtSkewnessOfDataset.population = (r.ipSqrtSkewnessOfDataset.population / (FMath::pow(r.ipSqrtStandardDeviation.population, 3)));
+    r.ipSkewnessOfDataset.population = (r.ipSkewnessOfDataset.population / (FMath::pow(r.ipStandardDeviation.population, 3)));
     r.ipSqrtSkewnessOfDataset.population = (r.ipSqrtSkewnessOfDataset.population / atomAllSumPopulation);
     r.ipSkewnessOfDataset.population = (r.ipSkewnessOfDataset.population / atomAllSumPopulation);
 
@@ -234,8 +234,8 @@ Data::CalculationResult Results::calculateExcessKurtosis(Data::CalculationResult
     uint64_t atomAllSumPopulation = std::accumulate(r.ipTheoreticalFrequency.begin(),
                                                     r.ipTheoreticalFrequency.end(), 0);
 
-    r.ipSqrtExcessKurtosisOfDataset.sample = (r.ipSqrtExcessKurtosisOfDataset.sample / (multiprecision::pow(r.ipSqrtStandardDeviation.sample, 4)));
-    r.ipExcessKurtosisOfDataset.sample = (r.ipExcessKurtosisOfDataset.sample / (multiprecision::pow(r.ipStandardDeviation.sample, 4)));
+    r.ipSqrtExcessKurtosisOfDataset.sample = (r.ipSqrtExcessKurtosisOfDataset.sample / (FMath::pow(r.ipSqrtStandardDeviation.sample, 4)));
+    r.ipExcessKurtosisOfDataset.sample = (r.ipExcessKurtosisOfDataset.sample / (FMath::pow(r.ipStandardDeviation.sample, 4)));
 
     float128 x0 = (this->atoms.allSum + 1);
     float128 x1 = (this->atoms.allSum - 1);
@@ -261,8 +261,8 @@ Data::CalculationResult Results::calculateExcessKurtosis(Data::CalculationResult
     r.ipSqrtExcessKurtosisOfDataset.sample = (r.ipSqrtExcessKurtosisOfDataset.sample - fraction);
     r.ipExcessKurtosisOfDataset.sample = (r.ipExcessKurtosisOfDataset.sample - fraction);
 
-    r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population / (multiprecision::pow(r.ipSqrtStandardDeviation.population, 4)));
-    r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population / (multiprecision::pow(r.ipStandardDeviation.population, 4)));
+    r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population / (FMath::pow(r.ipSqrtStandardDeviation.population, 4)));
+    r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population / (FMath::pow(r.ipStandardDeviation.population, 4)));
     r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population / atomAllSumPopulation);
     r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population / atomAllSumPopulation);
     r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population - 3);

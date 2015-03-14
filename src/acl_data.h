@@ -15,16 +15,13 @@
 /* The number of oxides used in Agemarker calculations */
 #define OXIDES_COUNT            53
 
-#include <boost/multiprecision/float128.hpp>
-
 #include <atomic>
 #include <vector>
 #include <map>
 
 #include "acl_mtrandom.h"
 #include "acl_global.h"
-
-using namespace boost::multiprecision;
+#include "acl_float.h"
 
 namespace ACL
 {
@@ -152,17 +149,17 @@ namespace ACL
                     return *this;
                 }
             };
+            /* typedefs */
             typedef StatisticalValue<uint64_t> StatisticalUInt64;
-            typedef StatisticalValue<float128> StatisticalFloat128;
-
-            typedef std::map<float128, uint64_t> IpValuesMap;
+            typedef StatisticalValue<Float> StatisticalFloat;
+            typedef std::map<Float, uint64_t> IpValuesMap;
         }
         /* Data structs used _internally_ in Agemarker Core Library. */
         namespace Structs
         {
             struct CalculationAtomData
             {
-                std::vector<float128> elementsNewContent;
+                std::vector<Float> elementsNewContent;
                 std::vector<uint64_t> allEight;
                 std::vector<uint64_t> all;
                 uint64_t allEightSum = 0;
@@ -170,7 +167,7 @@ namespace ACL
             };
             struct CalculationThreadInput
             {
-                std::vector<float128> elementsWeight;
+                std::vector<Float> elementsWeight;
                 std::vector<uint64_t> atomAllEight;
                 Logarithm logarithm;
                 uint64_t atomAllEightSum;
@@ -197,9 +194,9 @@ namespace ACL
         }
         struct CalculationInput
         {
-            std::vector<float128> oxidesContent;
-            std::vector<float128> elementsContent;
-            std::vector<float128> elementsWeight;
+            std::vector<Float> oxidesContent;
+            std::vector<Float> elementsContent;
+            std::vector<Float> elementsWeight;
             int decimalPrecision;
             uint64_t multiplier;
             int intervalsNumber;
@@ -211,33 +208,33 @@ namespace ACL
         {
             CalculationInput calculationInput;
             std::vector<uint64_t> atoms;
-            std::vector<float128> ip;
-            std::vector<float128> ipSqrt;
+            std::vector<Float> ip;
+            std::vector<Float> ipSqrt;
             std::vector<uint64_t> ipFrequency;
             std::vector<uint64_t> ipTheoreticalFrequency;
             uint64_t atomsSum;
-            Types::StatisticalFloat128 ipAverage;
-            Types::StatisticalFloat128 ipSqrtAverage;
-            Types::StatisticalFloat128 ipVariance;
-            Types::StatisticalFloat128 ipSqrtVariance;
-            Types::StatisticalFloat128 ipStandardDeviation;
-            Types::StatisticalFloat128 ipSqrtStandardDeviation;
-            Types::StatisticalFloat128 ipSkewnessOfDataset;
-            Types::StatisticalFloat128 ipSqrtSkewnessOfDataset;
-            Types::StatisticalFloat128 ipExcessKurtosisOfDataset;
-            Types::StatisticalFloat128 ipSqrtExcessKurtosisOfDataset;
-            float128 ipMeanSquareError;
-            float128 ipSqrtMeanSquareError;
-            float128 ipRange;
-            float128 ipSqrtRange;
-            float128 ipIntervalLength;
-            float128 ipSqrtIntervalLength;
-            std::vector<float128> ipIntervalMinimum;
-            std::vector<float128> ipSqrtIntervalMinimum;
-            std::vector<float128> ipIntervalMaximum;
-            std::vector<float128> ipSqrtIntervalMaximum;
-            std::vector<float128> ipIntervalCenter;
-            std::vector<float128> ipSqrtIntervalCenter;
+            Types::StatisticalFloat ipAverage;
+            Types::StatisticalFloat ipSqrtAverage;
+            Types::StatisticalFloat ipVariance;
+            Types::StatisticalFloat ipSqrtVariance;
+            Types::StatisticalFloat ipStandardDeviation;
+            Types::StatisticalFloat ipSqrtStandardDeviation;
+            Types::StatisticalFloat ipSkewnessOfDataset;
+            Types::StatisticalFloat ipSqrtSkewnessOfDataset;
+            Types::StatisticalFloat ipExcessKurtosisOfDataset;
+            Types::StatisticalFloat ipSqrtExcessKurtosisOfDataset;
+            Float ipMeanSquareError;
+            Float ipSqrtMeanSquareError;
+            Float ipRange;
+            Float ipSqrtRange;
+            Float ipIntervalLength;
+            Float ipSqrtIntervalLength;
+            std::vector<Float> ipIntervalMinimum;
+            std::vector<Float> ipSqrtIntervalMinimum;
+            std::vector<Float> ipIntervalMaximum;
+            std::vector<Float> ipSqrtIntervalMaximum;
+            std::vector<Float> ipIntervalCenter;
+            std::vector<Float> ipSqrtIntervalCenter;
             std::vector<Types::StatisticalUInt64> ipIntervalCount;
             std::vector<Types::StatisticalUInt64> ipSqrtIntervalCount;
         };

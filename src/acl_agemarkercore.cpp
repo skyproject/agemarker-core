@@ -20,7 +20,7 @@ AgemarkerCore::AgemarkerCore(Data::CalculationInput input)
 {
     qRegisterMetaType<Data::Types::IpValuesMap>("Data::Types::IpValuesMap");
     qRegisterMetaType<Data::Types::StatisticalUInt64>("Data::Types::StatisticalUInt64");
-    qRegisterMetaType<Data::Types::StatisticalFloat128>("Data::Types::StatisticalFloat128");
+    qRegisterMetaType<Data::Types::StatisticalFloat>("Data::Types::StatisticalFloat");
     this->data = input;
     this->runningThreads = input.threadsNumber;
 }
@@ -114,7 +114,7 @@ void AgemarkerCore::collectThreadResult(Data::Types::IpValuesMap result)
         }
         else
         {
-            this->calculatedIp.insert(std::pair<float128, uint64_t> (iter->first, iter->second));
+            this->calculatedIp.insert(std::pair<Float, uint64_t> (iter->first, iter->second));
         }
     }
     this->runningThreads--;

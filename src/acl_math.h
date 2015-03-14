@@ -16,9 +16,8 @@ namespace ACL
     class AGEMARKERCORESHARED_EXPORT Math
     {
         public:
-            static float128 ip(std::vector<float128> input,
-                             Data::Logarithm log);
-            static float128 roundFloat128(float128 source, int decimals);
+            static Float ip(std::vector<Float> input,
+                            Data::Logarithm log);
     };
 }
 

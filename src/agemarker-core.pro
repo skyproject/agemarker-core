@@ -6,7 +6,7 @@
 
 QT       -= gui
 
-QMAKE_CXXFLAGS += -std=gnu++0x
+QMAKE_CXXFLAGS += -std=gnu++1y
 QMAKE_CXXFLAGS_RELEASE += -O2
 
 TARGET = agemarker-core
@@ -30,7 +30,8 @@ HEADERS += acl_global.h \
            acl_data.h \
            acl_calculationthread.h \
            acl_results.h \
-           acl_atoms.h
+           acl_atoms.h \
+    acl_float.h
 
 
 LIBS += -lquadmath
