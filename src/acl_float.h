@@ -159,26 +159,25 @@ namespace ACL
                 {
                     if (v.isDouble() == true)
                     {
-                        *this->valueD += *v.valueD;
+                        return *this->valueD + *v.valueD;
                     }
                     else
                     {
-                        *this->valueD += boost::numeric_cast<double>
-                                         (*v.valueF128);
+                        return *this->valueD + boost::numeric_cast<double>
+                                               (*v.valueF128);
                     }
                 }
                 else
                 {
                     if (v.isDouble() == true)
                     {
-                        *this->valueF128 += *v.valueD;
+                        return *this->valueF128 + *v.valueD;
                     }
                     else
                     {
-                        *this->valueF128 += *v.valueF128;
+                        return *this->valueF128 + *v.valueF128;
                     }
                 }
-                return *this;
             }
             inline Float operator - (Float v)
             {
@@ -186,26 +185,25 @@ namespace ACL
                 {
                     if (v.isDouble() == true)
                     {
-                        *this->valueD -= *v.valueD;
+                        return *this->valueD - *v.valueD;
                     }
                     else
                     {
-                        *this->valueD -= boost::numeric_cast<double>
-                                         (*v.valueF128);
+                        return *this->valueD - boost::numeric_cast<double>
+                                               (*v.valueF128);
                     }
                 }
                 else
                 {
                     if (v.isDouble() == true)
                     {
-                        *this->valueF128 -= *v.valueD;
+                        return *this->valueF128 - *v.valueD;
                     }
                     else
                     {
-                        *this->valueF128 -= *v.valueF128;
+                        return *this->valueF128 - *v.valueF128;
                     }
                 }
-                return *this;
             }
             inline Float operator * (Float v)
             {
@@ -213,26 +211,25 @@ namespace ACL
                 {
                     if (v.isDouble() == true)
                     {
-                        *this->valueD *= *v.valueD;
+                        return *this->valueD * *v.valueD;
                     }
                     else
                     {
-                        *this->valueD *= boost::numeric_cast<double>
-                                         (*v.valueF128);
+                        return *this->valueD * boost::numeric_cast<double>
+                                               (*v.valueF128);
                     }
                 }
                 else
                 {
                     if (v.isDouble() == true)
                     {
-                        *this->valueF128 *= *v.valueD;
+                        return *this->valueF128 * *v.valueD;
                     }
                     else
                     {
-                        *this->valueF128 *= *v.valueF128;
+                        return *this->valueF128 * *v.valueF128;
                     }
                 }
-                return *this;
             }
             inline Float operator / (Float v)
             {
@@ -240,26 +237,25 @@ namespace ACL
                 {
                     if (v.isDouble() == true)
                     {
-                        *this->valueD /= *v.valueD;
+                        return *this->valueD / *v.valueD;
                     }
                     else
                     {
-                        *this->valueD /= boost::numeric_cast<double>
-                                         (*v.valueF128);
+                        return *this->valueD / boost::numeric_cast<double>
+                                               (*v.valueF128);
                     }
                 }
                 else
                 {
                     if (v.isDouble() == true)
                     {
-                        *this->valueF128 /= *v.valueD;
+                        return *this->valueF128 / *v.valueD;
                     }
                     else
                     {
-                        *this->valueF128 /= *v.valueF128;
+                        return *this->valueF128 / *v.valueF128;
                     }
                 }
-                return *this;
             }
             inline Float operator = (Float v)
             {
