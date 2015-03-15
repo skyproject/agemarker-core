@@ -6,7 +6,8 @@
 
 QT       -= gui
 
-QMAKE_CXXFLAGS += -std=gnu++1y
+QMAKE_CXXFLAGS += -std=c++14
+QMAKE_CXXFLAGS += -fext-numeric-literals
 QMAKE_CXXFLAGS_RELEASE += -O2
 
 TARGET = agemarker-core
