@@ -20,7 +20,6 @@
 #include <map>
 
 #include "acl_mtrandom.h"
-#include "acl_global.h"
 #include "acl_float.h"
 
 namespace ACL
@@ -56,11 +55,6 @@ namespace ACL
                 }
                 explicit AtomicUInt64(std::atomic<uint64_t> const &a) : atomic(a.load())
                 {
-                }
-
-                QString toString()
-                {
-                    return QString::number(atomic);
                 }
 
                 AtomicUInt64 &operator= (AtomicUInt64 const &other)

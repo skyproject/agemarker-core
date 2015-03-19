@@ -101,9 +101,9 @@ void CalculationThread::run()
             }
             atomicWeightGrid[8] += atomicWeightGrid[grid_it];
         }
-        //std::shuffle(atomicWeightGrid.begin(), atomicWeightGrid.end(), this->threadData.random->mtwister_engine);
+        std::shuffle(atomicWeightGrid.begin(), atomicWeightGrid.end(), this->threadData.random->mtwister_engine);
         Float ip = FMath::round(Math::ip(atomicWeightGrid, this->threadInput.logarithm), this->threadInput.decimalPrecision);
-        std::map<Float,0 uint64_t>::iterator it = ipMap.find(ip);
+        std::map<Float, uint64_t>::iterator it = ipMap.find(ip);
         if (it != ipMap.end())
         {
             it->second += 1;

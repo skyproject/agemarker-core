@@ -216,8 +216,8 @@ Data::CalculationResult Results::calculateSkewnessOfDataset(Data::CalculationRes
 
     r.ipSqrtSkewnessOfDataset.sample = (r.ipSqrtSkewnessOfDataset.sample / (FMath::pow(r.ipSqrtStandardDeviation.sample, 3)));
     r.ipSkewnessOfDataset.sample = (r.ipSkewnessOfDataset.sample / (FMath::pow(r.ipStandardDeviation.sample, 3)));
-    float128 denom = ((this->atoms.allSum - 1) * (this->atoms.allSum - 2));
-    float128 fraction = (this->atoms.allSum / denom);
+    Float denom = ((this->atoms.allSum - 1) * (this->atoms.allSum - 2));
+    Float fraction = (this->atoms.allSum / denom);
     r.ipSqrtSkewnessOfDataset.sample = (r.ipSqrtSkewnessOfDataset.sample * fraction);
     r.ipSkewnessOfDataset.sample = (r.ipSkewnessOfDataset.sample * fraction);
 
@@ -237,14 +237,14 @@ Data::CalculationResult Results::calculateExcessKurtosis(Data::CalculationResult
     r.ipSqrtExcessKurtosisOfDataset.sample = (r.ipSqrtExcessKurtosisOfDataset.sample / (FMath::pow(r.ipSqrtStandardDeviation.sample, 4)));
     r.ipExcessKurtosisOfDataset.sample = (r.ipExcessKurtosisOfDataset.sample / (FMath::pow(r.ipStandardDeviation.sample, 4)));
 
-    float128 x0 = (this->atoms.allSum + 1);
-    float128 x1 = (this->atoms.allSum - 1);
-    float128 x2 = (this->atoms.allSum - 2);
-    float128 x3 = (this->atoms.allSum - 3);
+    Float x0 = (this->atoms.allSum + 1);
+    Float x1 = (this->atoms.allSum - 1);
+    Float x2 = (this->atoms.allSum - 2);
+    Float x3 = (this->atoms.allSum - 3);
 
-    float128 num = (this->atoms.allSum * x0);
-    float128 denom = (x1 * x2 * x3);
-    float128 fraction = (num / denom);
+    Float num = (this->atoms.allSum * x0);
+    Float denom = (x1 * x2 * x3);
+    Float fraction = (num / denom);
 
     x0 = (atomAllSumPopulation + 1);
     x1 = (atomAllSumPopulation - 1);

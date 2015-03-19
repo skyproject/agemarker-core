@@ -4,6 +4,13 @@
 #
 #-------------------------------------------------
 
+# Please note that the library can be compiled to use
+# either "double" precision or quadruple precision
+# (the latter is provided by Boost Multiprecision's
+# "float128" type).
+#
+# See "acl_global.h" file for the preprocessor defines.
+
 QT       -= gui
 
 QMAKE_CXXFLAGS += -std=c++14

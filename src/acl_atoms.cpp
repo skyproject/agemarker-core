@@ -203,7 +203,7 @@ Data::Structs::CalculationAtomData Atoms::getAtomData()
         }
 
         Float atom = FMath::round(nor * this->data.multiplier);
-        this->atoms.all.push_back(FMath::boost_numeric_cast<uint64_t>(atom));
+        this->atoms.all.push_back(boost::numeric_cast<uint64_t>(atom));
 
         this->atoms.allSum += atoms.all[x];
         this->atoms.allEight.push_back(atoms.all[x] * 8);
