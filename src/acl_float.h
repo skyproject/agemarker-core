@@ -153,6 +153,19 @@ namespace ACL
                 }
                 return *this;
             }
+            template <typename T>
+            inline Float operator += (T v)
+            {
+                if (isDouble() == true)
+                {
+                    *this->valueD += boost::numeric_cast<double>(v);
+                }
+                else
+                {
+                    *this->valueF128 += v;
+                }
+                return *this;
+            }
             inline Float operator + (Float v)
             {
                 if (isDouble() == true)
@@ -177,6 +190,18 @@ namespace ACL
                     {
                         return *this->valueF128 + *v.valueF128;
                     }
+                }
+            }
+            template <typename T>
+            inline Float operator + (T v)
+            {
+                if (isDouble() == true)
+                {
+                    return *this->valueD + boost::numeric_cast<double>(v);
+                }
+                else
+                {
+                    return *this->valueF128 + v;
                 }
             }
             inline Float operator - (Float v)
@@ -205,6 +230,18 @@ namespace ACL
                     }
                 }
             }
+            template <typename T>
+            inline Float operator - (T v)
+            {
+                if (isDouble() == true)
+                {
+                    return *this->valueD - boost::numeric_cast<double>(v);
+                }
+                else
+                {
+                    return *this->valueF128 - v;
+                }
+            }
             inline Float operator * (Float v)
             {
                 if (isDouble() == true)
@@ -231,6 +268,18 @@ namespace ACL
                     }
                 }
             }
+            template <typename T>
+            inline Float operator * (T v)
+            {
+                if (isDouble() == true)
+                {
+                    return *this->valueD * boost::numeric_cast<double>(v);
+                }
+                else
+                {
+                    return *this->valueF128 * v;
+                }
+            }
             inline Float operator / (Float v)
             {
                 if (isDouble() == true)
@@ -255,6 +304,18 @@ namespace ACL
                     {
                         return *this->valueF128 / *v.valueF128;
                     }
+                }
+            }
+            template <typename T>
+            inline Float operator / (T v)
+            {
+                if (isDouble() == true)
+                {
+                    return *this->valueD / boost::numeric_cast<double>(v);
+                }
+                else
+                {
+                    return *this->valueF128 / v;
                 }
             }
             inline Float operator = (Float v)
@@ -396,7 +457,11 @@ namespace ACL
             template <typename T>
             inline bool operator != (const T& other)
             {
-                return !(*this == other);
+                if (isDouble() == true)
+                {
+                    return getDouble() != other;
+                }
+                return getF128() != other;
             }
 
         private:

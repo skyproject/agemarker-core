@@ -45,12 +45,23 @@ namespace ACL
             {
                 std::atomic<uint64_t> atomic;
 
-                AtomicUInt64() : atomic(uint64_t()) {}
+                AtomicUInt64() : atomic(uint64_t())
+                {
+                }
+                AtomicUInt64(AtomicUInt64 const &other) : atomic(other.atomic.load())
+                {
+                }
+                explicit AtomicUInt64(uint64_t const &v) : atomic(v)
+                {
+                }
+                explicit AtomicUInt64(std::atomic<uint64_t> const &a) : atomic(a.load())
+                {
+                }
 
-                explicit AtomicUInt64(uint64_t const &v) : atomic(v) {}
-                explicit AtomicUInt64(std::atomic<uint64_t> const &a) : atomic(a.load()) {}
-
-                AtomicUInt64(AtomicUInt64 const &other) : atomic(other.atomic.load()) {}
+                QString toString()
+                {
+                    return QString::number(atomic);
+                }
 
                 AtomicUInt64 &operator= (AtomicUInt64 const &other)
                 {
@@ -178,12 +189,12 @@ namespace ACL
             struct CalculationThreadShared
             {
                 MTRandom *random;
-                /* 'atomsUsed' points to the array of 118
+                /* 'atomsUsed' represents an array of 118
                  * values; each of them represents the number
                  * of already chosen atomic weights for a
                  * single chemical element.
                  */
-                Types::AtomicUInt64 *atomsUsed;
+                std::vector<Types::AtomicUInt64> *atomsUsed;
                 /* 'runningThreads' represents the number of active
                  * calculation threads. When single thread's destructor
                  * is called, it decrements this number by 1. In case

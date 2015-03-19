@@ -39,10 +39,10 @@ void AgemarkerCore::startCalculation()
     threadsShared.random = new MTRandom();
     threadsShared.runningThreads = new int();
     *threadsShared.runningThreads = this->runningThreads;
-    threadsShared.atomsUsed = new Data::Types::AtomicUInt64[ELEMENTS_COUNT];
+    threadsShared.atomsUsed = new std::vector<Data::Types::AtomicUInt64>;
     for (int x = 0; x < ELEMENTS_COUNT; ++x)
     {
-        threadsShared.atomsUsed[x] = 0;
+        threadsShared.atomsUsed->push_back(Data::Types::AtomicUInt64(0));
     }
 
     Data::Structs::CalculationThreadInput threadInput;

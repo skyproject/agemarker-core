@@ -17,10 +17,8 @@ namespace ACL
     {
         public:
             MTRandom();
-            uint64_t getRandomULongLong(uint64_t minValue, uint64_t maxValue);
-
-        private:
             std::mt19937_64 mtwister_engine;
+            uint64_t getRandomULongLong(uint64_t minValue, uint64_t maxValue);
     };
 }
 

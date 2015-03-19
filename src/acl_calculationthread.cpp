@@ -6,6 +6,9 @@
  * For full terms see LICENSE file.
  */
 
+#include <iostream>
+#include <QDebug>
+
 #include "acl_calculationthread.h"
 #include "acl_math.h"
 
@@ -24,7 +27,7 @@ CalculationThread::~CalculationThread()
     if (*this->threadData.runningThreads == 0)
     {
         delete this->threadData.random;
-        delete[] this->threadData.atomsUsed;
+        delete this->threadData.atomsUsed;
         delete this->threadData.runningThreads;
     }
 }
@@ -52,7 +55,7 @@ void CalculationThread::removeThread()
 
 void CalculationThread::run()
 {
-    std::vector<Float> input = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    std::vector<Float> atomicWeightGrid = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     uint64_t atomicWeightSelector, atomicWeightIterator;
     Data::Types::IpValuesMap ipMap;
     for (uint64_t l = this->threadInput.startIteration;
@@ -68,15 +71,15 @@ void CalculationThread::run()
             this->pauseCond.wait(&this->syncMutex);
         }
         this->syncMutex.unlock();
-        std::fill(input.begin(), input.end(), 0);
+        std::fill(atomicWeightGrid.begin(), atomicWeightGrid.end(), 0);
         /* The loop below randomly places 8 atomic weights
          * from 'atomAllEight' to 'input' vector and fills
          * the 9th value of this vector with the total sum
          * of atomic weights in it.
          */
-        for (int input_it = 0; input_it < 8; ++input_it)
+        for (int grid_it = 0; grid_it < 8; ++grid_it)
         {
-            while (input[input_it] == 0)
+            while (atomicWeightGrid[grid_it] == 0)
             {
                 atomicWeightSelector = this->threadData.random->getRandomULongLong(1, this->threadInput.atomAllEightSum);
                 atomicWeightIterator = 0;
@@ -86,21 +89,21 @@ void CalculationThread::run()
                     {
                         atomicWeightIterator += this->threadInput.atomAllEight[elements_it];
                         if (atomicWeightSelector <= atomicWeightIterator
-                            && this->threadData.atomsUsed[elements_it] <
+                            && this->threadData.atomsUsed->at(elements_it) <
                             this->threadInput.atomAllEight[elements_it])
                         {
-                            input[input_it] = this->threadInput.elementsWeight[elements_it];
-                            ++this->threadData.atomsUsed[elements_it];
+                            atomicWeightGrid[grid_it] = this->threadInput.elementsWeight[elements_it];
+                            ++this->threadData.atomsUsed->at(elements_it);
                             break;
                         }
                     }
                 }
             }
-            input[8] += input[input_it];
+            atomicWeightGrid[8] += atomicWeightGrid[grid_it];
         }
-        std::random_shuffle(input.begin(), input.end());
-        Float ip = FMath::round(Math::ip(input, this->threadInput.logarithm), this->threadInput.decimalPrecision);
-        std::map<Float, uint64_t>::iterator it = ipMap.find(ip);
+        //std::shuffle(atomicWeightGrid.begin(), atomicWeightGrid.end(), this->threadData.random->mtwister_engine);
+        Float ip = FMath::round(Math::ip(atomicWeightGrid, this->threadInput.logarithm), this->threadInput.decimalPrecision);
+        std::map<Float,0 uint64_t>::iterator it = ipMap.find(ip);
         if (it != ipMap.end())
         {
             it->second += 1;
