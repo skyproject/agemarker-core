@@ -39,7 +39,7 @@ HEADERS += acl_global.h \
            acl_calculationthread.h \
            acl_results.h \
            acl_atoms.h \
-    acl_float.h
+           acl_float.h
 
 
 LIBS += -lquadmath

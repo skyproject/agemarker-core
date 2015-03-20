@@ -19,9 +19,15 @@
 
 #include "acl_global.h"
 
+/* Look up "acl_global.h" for USING_DOUBLE and
+ * USING_FLOAT128 definitions (read the Qt Project
+ * file) for more information.
+*/
+
 #ifdef USING_DOUBLE
 #define Float double
-#elif USING_FLOAT128
+#endif
+#ifdef USING_FLOAT128
 #define Float boost::multiprecision::float128
 #endif
 
@@ -78,7 +84,8 @@ namespace ACL
                  * "double" type is able to handle. */
                 return toStr(v, 12);
             }
-#elif USING_FLOAT128
+#endif
+#ifdef USING_FLOAT128
             static float128 round(float128 v)
             {
                 return boost::multiprecision::round(v);
