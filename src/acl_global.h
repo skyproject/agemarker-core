@@ -20,15 +20,19 @@
 
 /* To compile the library with extended precision floats,
  * uncomment the following line.
- * Note: don't forget to rebuild the "agemarker" project.
+ * Note: don't forget to rebuild the "agemarker" project
+ * _and change the project files of both "agemarker-core" and
+ * "agemarker"_.
  */
-#define USING_FLOAT128
+//#define USING_FLOAT128
 
 /* To compile the library with standard ("double") precision
  * floats, uncomment the following line.
- * Note: don't forget to rebuild the "agemarker" project.
+ * Note: don't forget to rebuild the "agemarker" project
+ * _and change the project files of both "agemarker-core" and
+ * "agemarker"_.
  */
-//#define USING_DOUBLE
+#define USING_DOUBLE
 
 /* See "acl_float.h" for the main implementation
  * (functions / "Float" definitions).

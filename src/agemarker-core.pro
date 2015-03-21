@@ -17,7 +17,11 @@ QMAKE_CXXFLAGS += -std=c++14
 QMAKE_CXXFLAGS += -fext-numeric-literals
 QMAKE_CXXFLAGS_RELEASE += -O2
 
+# When compiling the library with USING_FLOAT128,
+# change TARGET (output filename) to agemarker-core-ep.
+# Don't forget to do the same for the main program.
 TARGET = agemarker-core
+
 TEMPLATE = lib
 
 DEFINES += AGEMARKERCORE_LIBRARY
