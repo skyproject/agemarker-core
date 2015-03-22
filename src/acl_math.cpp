@@ -10,19 +10,20 @@
 
 using namespace ACL;
 
-double Math::ip(std::vector<double> input, Data::Logarithm log)
+Float Math::ip(std::vector<Float> input, Data::Logarithm log)
 {
-    double rowSum[3];
-    double columnSum[3];
-    double rowsTotalSum = 0;
-    double rowsUncertaintyTotal = 0;
-    double columnsUncertaintyTotal = 0;
+    Float rowSum[3];
+    Float columnSum[3];
+    Float rowsTotalSum = 0;
+    Float rowsUncertaintyTotal = 0;
+    Float columnsUncertaintyTotal = 0;
     for (int x = 0; x < 3; ++x)
     {
         columnSum[x] = input[x] + input[(x + 3)] + input[(x + 6)];
         rowSum[x] = input[(x * 3)] + input[(x * 3) + 1] + input[(x * 3) + 2];
         rowsTotalSum += rowSum[x];
     }
+
     /* Fill 'rowSum' array with uncertainty values for each row */
     if (log == Data::Logarithm::Natural)
     {
@@ -30,12 +31,12 @@ double Math::ip(std::vector<double> input, Data::Logarithm log)
         {
             if (rowSum[x] > 0)
             {
-                rowSum[x] = std::abs((rowSum[x] / rowsTotalSum) * std::log(rowSum[x] / rowsTotalSum));
+                rowSum[x] = FMath::abs((rowSum[x] / rowsTotalSum) * FMath::log(rowSum[x] / rowsTotalSum));
                 rowsUncertaintyTotal += rowSum[x];
             }
             if (columnSum[x] > 0)
             {
-                columnSum[x] = std::abs((columnSum[x] / rowsTotalSum) * std::log(columnSum[x] / rowsTotalSum));
+                columnSum[x] = FMath::abs((columnSum[x] / rowsTotalSum) * FMath::log(columnSum[x] / rowsTotalSum));
                 columnsUncertaintyTotal += columnSum[x];
             }
         }
@@ -46,24 +47,24 @@ double Math::ip(std::vector<double> input, Data::Logarithm log)
         {
             if (rowSum[x] > 0)
             {
-                rowSum[x] = std::abs((rowSum[x] / rowsTotalSum) * std::log10(rowSum[x] / rowsTotalSum));
+                rowSum[x] = FMath::abs((rowSum[x] / rowsTotalSum) * FMath::log10(rowSum[x] / rowsTotalSum));
                 rowsUncertaintyTotal += rowSum[x];
             }
             if (columnSum[x] > 0)
             {
-                columnSum[x] = std::abs((columnSum[x] / rowsTotalSum) * std::log10(columnSum[x] / rowsTotalSum));
+                columnSum[x] = FMath::abs((columnSum[x] / rowsTotalSum) * FMath::log10(columnSum[x] / rowsTotalSum));
                 columnsUncertaintyTotal += columnSum[x];
             }
         }
     }
-    double kab = 0;
+    Float kab = 0;
     if (log == Data::Logarithm::Natural)
     {
         for (int x = 0; x < 9; ++x)
         {
             if (input[x] > 0)
             {
-                kab += std::abs(input[x] / rowsTotalSum * std::log(input[x] / rowsTotalSum));
+                kab += FMath::abs(input[x] / rowsTotalSum * FMath::log(input[x] / rowsTotalSum));
             }
         }
     }
@@ -73,14 +74,9 @@ double Math::ip(std::vector<double> input, Data::Logarithm log)
         {
             if (input[x] > 0)
             {
-                kab += std::abs(input[x] / rowsTotalSum * std::log10(input[x] / rowsTotalSum));
+                kab += FMath::abs(input[x] / rowsTotalSum * FMath::log10(input[x] / rowsTotalSum));
             }
         }
     }
     return (rowsUncertaintyTotal + columnsUncertaintyTotal - kab);
-}
-
-double Math::roundDouble(double source, int decimals)
-{
-    return std::ceil((source * std::pow(10, decimals)) - 0.49L) / std::pow(10, decimals);
 }

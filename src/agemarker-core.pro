@@ -4,12 +4,24 @@
 #
 #-------------------------------------------------
 
+# Please note that the library can be compiled to use
+# either "double" precision or quadruple precision
+# (the latter is provided by Boost Multiprecision's
+# "float128" type).
+#
+# See "acl_global.h" file for the preprocessor defines.
+
 QT       -= gui
 
-QMAKE_CXXFLAGS += -std=c++0x
+QMAKE_CXXFLAGS += -std=c++14
+QMAKE_CXXFLAGS += -fext-numeric-literals
 QMAKE_CXXFLAGS_RELEASE += -O2
 
+# When compiling the library with USING_FLOAT128,
+# change TARGET (output filename) to agemarker-core-ep.
+# Don't forget to do the same for the main program.
 TARGET = agemarker-core
+
 TEMPLATE = lib
 
 DEFINES += AGEMARKERCORE_LIBRARY
@@ -30,7 +42,13 @@ HEADERS += acl_global.h \
            acl_data.h \
            acl_calculationthread.h \
            acl_results.h \
-           acl_atoms.h
+           acl_atoms.h \
+           acl_float.h
+
+
+LIBS += -lquadmath
+
+INCLUDEPATH += $$quote(c:/Users/mlabu_000.RESONANS-PC/Documents/Libs)
 
 
 unix:!symbian {

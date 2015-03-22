@@ -20,7 +20,7 @@ AgemarkerCore::AgemarkerCore(Data::CalculationInput input)
 {
     qRegisterMetaType<Data::Types::IpValuesMap>("Data::Types::IpValuesMap");
     qRegisterMetaType<Data::Types::StatisticalUInt64>("Data::Types::StatisticalUInt64");
-    qRegisterMetaType<Data::Types::StatisticalDouble>("Data::Types::StatisticalDouble");
+    qRegisterMetaType<Data::Types::StatisticalFloat>("Data::Types::StatisticalFloat");
     this->data = input;
     this->runningThreads = input.threadsNumber;
 }
@@ -39,10 +39,10 @@ void AgemarkerCore::startCalculation()
     threadsShared.random = new MTRandom();
     threadsShared.runningThreads = new int();
     *threadsShared.runningThreads = this->runningThreads;
-    threadsShared.atomsUsed = new Data::Types::AtomicUInt64[ELEMENTS_COUNT];
+    threadsShared.atomsUsed = new std::vector<Data::Types::AtomicUInt64>;
     for (int x = 0; x < ELEMENTS_COUNT; ++x)
     {
-        threadsShared.atomsUsed[x] = 0;
+        threadsShared.atomsUsed->push_back(Data::Types::AtomicUInt64(0));
     }
 
     Data::Structs::CalculationThreadInput threadInput;
@@ -114,7 +114,7 @@ void AgemarkerCore::collectThreadResult(Data::Types::IpValuesMap result)
         }
         else
         {
-            this->calculatedIp.insert(std::pair<double, uint64_t> (iter->first, iter->second));
+            this->calculatedIp.insert(std::pair<Float, uint64_t> (iter->first, iter->second));
         }
     }
     this->runningThreads--;

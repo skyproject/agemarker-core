@@ -20,7 +20,7 @@
 #include <map>
 
 #include "acl_mtrandom.h"
-#include "acl_global.h"
+#include "acl_float.h"
 
 namespace ACL
 {
@@ -44,12 +44,18 @@ namespace ACL
             {
                 std::atomic<uint64_t> atomic;
 
-                AtomicUInt64() : atomic(uint64_t()) {}
-
-                explicit AtomicUInt64(uint64_t const &v) : atomic(v) {}
-                explicit AtomicUInt64(std::atomic<uint64_t> const &a) : atomic(a.load()) {}
-
-                AtomicUInt64(AtomicUInt64 const &other) : atomic(other.atomic.load()) {}
+                AtomicUInt64() : atomic(uint64_t())
+                {
+                }
+                AtomicUInt64(AtomicUInt64 const &other) : atomic(other.atomic.load())
+                {
+                }
+                explicit AtomicUInt64(uint64_t const &v) : atomic(v)
+                {
+                }
+                explicit AtomicUInt64(std::atomic<uint64_t> const &a) : atomic(a.load())
+                {
+                }
 
                 AtomicUInt64 &operator= (AtomicUInt64 const &other)
                 {
@@ -148,17 +154,17 @@ namespace ACL
                     return *this;
                 }
             };
+            /* typedefs */
             typedef StatisticalValue<uint64_t> StatisticalUInt64;
-            typedef StatisticalValue<double> StatisticalDouble;
-
-            typedef std::map<double, uint64_t> IpValuesMap;
+            typedef StatisticalValue<Float> StatisticalFloat;
+            typedef std::map<Float, uint64_t> IpValuesMap;
         }
         /* Data structs used _internally_ in Agemarker Core Library. */
         namespace Structs
         {
             struct CalculationAtomData
             {
-                std::vector<double> elementsNewContent;
+                std::vector<Float> elementsNewContent;
                 std::vector<uint64_t> allEight;
                 std::vector<uint64_t> all;
                 uint64_t allEightSum = 0;
@@ -166,7 +172,7 @@ namespace ACL
             };
             struct CalculationThreadInput
             {
-                std::vector<double> elementsWeight;
+                std::vector<Float> elementsWeight;
                 std::vector<uint64_t> atomAllEight;
                 Logarithm logarithm;
                 uint64_t atomAllEightSum;
@@ -177,25 +183,25 @@ namespace ACL
             struct CalculationThreadShared
             {
                 MTRandom *random;
-                /* 'atomsUsed' points to the array of 118
-                 * values; each of them represents the number
-                 * of already chosen atomic weights for a
-                 * single chemical element.
+                /* 'atomsUsed' represents an array with the
+                 * numbers of already choosen atomic weights
+                 * of a single chemical element.
                  */
-                Types::AtomicUInt64 *atomsUsed;
+                std::vector<Types::AtomicUInt64> *atomsUsed;
                 /* 'runningThreads' represents the number of active
                  * calculation threads. When single thread's destructor
                  * is called, it decrements this number by 1. In case
-                 * it is equal to 0, all shared pointers are deallocated.
+                 * the value is equal to 0, all shared pointers are
+                 * deallocated.
                  */
-                int *runningThreads;
+                int *runningThreads; /* <- TODO: Use smart pointers instead. */
             };
         }
         struct CalculationInput
         {
-            std::vector<double> oxidesContent;
-            std::vector<double> elementsContent;
-            std::vector<double> elementsWeight;
+            std::vector<Float> oxidesContent;
+            std::vector<Float> elementsContent;
+            std::vector<Float> elementsWeight;
             int decimalPrecision;
             uint64_t multiplier;
             int intervalsNumber;
@@ -207,33 +213,33 @@ namespace ACL
         {
             CalculationInput calculationInput;
             std::vector<uint64_t> atoms;
-            std::vector<double> ip;
-            std::vector<double> ipSqrt;
+            std::vector<Float> ip;
+            std::vector<Float> ipSqrt;
             std::vector<uint64_t> ipFrequency;
             std::vector<uint64_t> ipTheoreticalFrequency;
             uint64_t atomsSum;
-            Types::StatisticalDouble ipAverage;
-            Types::StatisticalDouble ipSqrtAverage;
-            Types::StatisticalDouble ipVariance;
-            Types::StatisticalDouble ipSqrtVariance;
-            Types::StatisticalDouble ipStandardDeviation;
-            Types::StatisticalDouble ipSqrtStandardDeviation;
-            Types::StatisticalDouble ipSkewnessOfDataset;
-            Types::StatisticalDouble ipSqrtSkewnessOfDataset;
-            Types::StatisticalDouble ipExcessKurtosisOfDataset;
-            Types::StatisticalDouble ipSqrtExcessKurtosisOfDataset;
-            double ipMeanSquareError;
-            double ipSqrtMeanSquareError;
-            double ipRange;
-            double ipSqrtRange;
-            double ipIntervalLength;
-            double ipSqrtIntervalLength;
-            std::vector<double> ipIntervalMinimum;
-            std::vector<double> ipSqrtIntervalMinimum;
-            std::vector<double> ipIntervalMaximum;
-            std::vector<double> ipSqrtIntervalMaximum;
-            std::vector<double> ipIntervalCenter;
-            std::vector<double> ipSqrtIntervalCenter;
+            Types::StatisticalFloat ipAverage;
+            Types::StatisticalFloat ipSqrtAverage;
+            Types::StatisticalFloat ipVariance;
+            Types::StatisticalFloat ipSqrtVariance;
+            Types::StatisticalFloat ipStandardDeviation;
+            Types::StatisticalFloat ipSqrtStandardDeviation;
+            Types::StatisticalFloat ipSkewnessOfDataset;
+            Types::StatisticalFloat ipSqrtSkewnessOfDataset;
+            Types::StatisticalFloat ipExcessKurtosisOfDataset;
+            Types::StatisticalFloat ipSqrtExcessKurtosisOfDataset;
+            Float ipMeanSquareError;
+            Float ipSqrtMeanSquareError;
+            Float ipRange;
+            Float ipSqrtRange;
+            Float ipIntervalLength;
+            Float ipSqrtIntervalLength;
+            std::vector<Float> ipIntervalMinimum;
+            std::vector<Float> ipSqrtIntervalMinimum;
+            std::vector<Float> ipIntervalMaximum;
+            std::vector<Float> ipSqrtIntervalMaximum;
+            std::vector<Float> ipIntervalCenter;
+            std::vector<Float> ipSqrtIntervalCenter;
             std::vector<Types::StatisticalUInt64> ipIntervalCount;
             std::vector<Types::StatisticalUInt64> ipSqrtIntervalCount;
         };

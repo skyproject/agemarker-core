@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2013 Mikhail Labushev.
+ *
+ * This file is a part of agemarker-core
+ * library distributed under the MIT License.
+ * For full terms see LICENSE file.
+ */
+
 #ifndef ATOMS_H
 #define ATOMS_H
 
