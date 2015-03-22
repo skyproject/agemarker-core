@@ -6,9 +6,6 @@
  * For full terms see LICENSE file.
  */
 
-#include <iostream>
-#include <QDebug>
-
 #include "acl_calculationthread.h"
 #include "acl_math.h"
 

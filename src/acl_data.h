@@ -183,18 +183,18 @@ namespace ACL
             struct CalculationThreadShared
             {
                 MTRandom *random;
-                /* 'atomsUsed' represents an array of 118
-                 * values; each of them represents the number
-                 * of already chosen atomic weights for a
-                 * single chemical element.
+                /* 'atomsUsed' represents an array with the
+                 * numbers of already choosen atomic weights
+                 * of a single chemical element.
                  */
                 std::vector<Types::AtomicUInt64> *atomsUsed;
                 /* 'runningThreads' represents the number of active
                  * calculation threads. When single thread's destructor
                  * is called, it decrements this number by 1. In case
-                 * it is equal to 0, all shared pointers are deallocated.
+                 * the value is equal to 0, all shared pointers are
+                 * deallocated.
                  */
-                int *runningThreads;
+                int *runningThreads; /* <- TODO: Use smart pointers instead. */
             };
         }
         struct CalculationInput
