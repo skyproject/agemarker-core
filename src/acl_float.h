@@ -132,7 +132,7 @@ namespace ACL
                  * can handle, but we take extra precaution
                  * and settle on 30 decimal places.
                  */
-                return toStr(v, 12);
+                return toStr(v, 30);
             }
 #endif
     };
