@@ -10,7 +10,6 @@
 #include "acl_math.h"
 
 using namespace ACL;
-using namespace boost;
 
 Results::Results(Data::CalculationInput inputData, Data::Structs::CalculationAtomData atomData,
                  Data::Types::IpValuesMap ipValues)
