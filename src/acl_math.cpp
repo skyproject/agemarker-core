@@ -9,7 +9,6 @@
 #include "acl_math.h"
 
 using namespace ACL;
-using namespace boost;
 
 Float Math::ip(std::vector<Float> input, Data::Logarithm log)
 {
