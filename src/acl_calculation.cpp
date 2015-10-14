@@ -6,19 +6,19 @@
  * For full terms see LICENSE file.
  */
 
-#include "acl_calculationthread.h"
+#include "acl_calculation.h"
 #include "acl_math.h"
 
 using namespace ACL;
 
-CalculationThread::CalculationThread(Data::Structs::CalculationThreadInput input,
-                                     Data::Structs::CalculationThreadShared shared)
+Calculation::Calculation(Data::Structs::CalculationThreadInput input,
+                         Data::Structs::CalculationThreadShared shared)
 {
     this->threadInput = input;
     this->threadData = shared;
 }
 
-CalculationThread::~CalculationThread()
+Calculation::~Calculation()
 {
     *this->threadData.runningThreads = *this->threadData.runningThreads - 1;
     if (*this->threadData.runningThreads == 0)
@@ -29,14 +29,14 @@ CalculationThread::~CalculationThread()
     }
 }
 
-void CalculationThread::pauseThread()
+void Calculation::pauseThread()
 {
     this->syncMutex.lock();
     this->pause = true;
     this->syncMutex.unlock();
 }
 
-void CalculationThread::resumeThread()
+void Calculation::resumeThread()
 {
     this->syncMutex.lock();
     this->pause = false;
@@ -44,13 +44,13 @@ void CalculationThread::resumeThread()
     this->pauseCond.wakeAll();
 }
 
-void CalculationThread::removeThread()
+void Calculation::removeThread()
 {
     this->cancel = true;
     this->pauseCond.wakeAll();
 }
 
-void CalculationThread::run()
+void Calculation::run()
 {
     std::vector<Float> atomicWeightGrid = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     uint64_t atomicWeightSelector, atomicWeightIterator;

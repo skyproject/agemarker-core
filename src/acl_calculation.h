@@ -6,34 +6,35 @@
  * For full terms see LICENSE file.
  */
 
-#ifndef ACL_CALCULATIONTHREAD_H
-#define ACL_CALCULATIONTHREAD_H
+#ifndef ACL_CALCULATION_H
+#define ACL_CALCULATION_H
 
 #include <QWaitCondition>
-#include <QThread>
 #include <QMutex>
 
 #include "acl_data.h"
 
 namespace ACL
 {
-    class CalculationThread : public QThread
+    class Calculation : public QObject
     {
             Q_OBJECT
 
         public:
-            CalculationThread(Data::Structs::CalculationThreadInput input,
-                              Data::Structs::CalculationThreadShared shared);
-            ~CalculationThread();
+            Calculation(Data::Structs::CalculationThreadInput input,
+                        Data::Structs::CalculationThreadShared shared);
+            ~Calculation();
             void pauseThread();
             void resumeThread();
             void removeThread();
+
+        public slots:
+            void run();
 
         signals:
             void threadCalculationFinished(Data::Types::IpValuesMap calculatedIpValues);
 
         private:
-            void run();
             Data::Structs::CalculationThreadInput threadInput;
             Data::Structs::CalculationThreadShared threadData;
             QMutex syncMutex;
@@ -43,4 +44,4 @@ namespace ACL
     };
 }
 
-#endif // ACL_CALCULATIONTHREAD_H
+#endif // ACL_CALCULATION_H

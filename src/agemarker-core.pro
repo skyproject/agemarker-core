@@ -29,10 +29,10 @@ DEFINES += AGEMARKERCORE_LIBRARY
 
 SOURCES += acl_agemarkercore.cpp \
            acl_math.cpp \
-           acl_calculationthread.cpp \
            acl_mtrandom.cpp \
            acl_results.cpp \
-           acl_atoms.cpp
+           acl_atoms.cpp \
+           acl_calculation.cpp
 
 
 HEADERS += acl_global.h \
@@ -40,10 +40,10 @@ HEADERS += acl_global.h \
            acl_mtrandom.h \
            acl_math.h \
            acl_data.h \
-           acl_calculationthread.h \
            acl_results.h \
            acl_atoms.h \
-           acl_float.h
+           acl_float.h \
+           acl_calculation.h
 
 
 LIBS += -lquadmath

@@ -11,7 +11,7 @@
 
 #include <QObject>
 
-#include "acl_calculationthread.h"
+#include "acl_calculation.h"
 #include "acl_data.h"
 
 namespace ACL
@@ -36,6 +36,17 @@ namespace ACL
 
         private:
             void calculateAtoms();
+            struct CalculationThread
+            {
+                /* A somewhat-dirty workaround for Qt's multithreading "You're doing it wrong".
+                 *
+                 * See "http://blog.qt.io/blog/2010/06/17/youre-doing-it-wrong",
+                 * "http://stackoverflow.com/questions/19041742/qt-no-matching-function-for-call-to-connect-modifying-qt-fortune-threaded-ser/19045952#19045952"
+                 * for more information.
+                 */
+                QThread *thread;
+                ACL::Calculation *calculation;
+            };
             std::vector<CalculationThread *> threads;
             Data::Types::IpValuesMap calculatedIp;
             Data::CalculationInput data;
