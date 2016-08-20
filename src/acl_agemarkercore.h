@@ -21,7 +21,7 @@ namespace ACL
             Q_OBJECT
 
         public:
-            AgemarkerCore(Data::CalculationInput input);
+            AgemarkerCore(Data::CalculationInput input, Data::CalculationResultOptions options);
             ~AgemarkerCore();
             void startCalculation();
             void pauseCalculation();
@@ -50,6 +50,7 @@ namespace ACL
             std::vector<CalculationThread *> threads;
             Data::Types::IpValuesMap calculatedIp;
             Data::CalculationInput data;
+            Data::CalculationResultOptions resultOptions;
             Data::Structs::CalculationAtomData atoms;
             int runningThreads;
     };

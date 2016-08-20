@@ -209,6 +209,11 @@ namespace ACL
             ElementsContentUnits elementsContentUnits;
             int threadsNumber;
         };
+        struct CalculationResultOptions {
+            bool includeApproximateFrequencies;
+            int approximateFrequencyPrecision;
+            bool includeApproximateValues;
+        };
         struct CalculationResult
         {
             CalculationInput calculationInput;

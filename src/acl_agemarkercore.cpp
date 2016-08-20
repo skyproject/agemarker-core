@@ -17,12 +17,14 @@
 
 using namespace ACL;
 
-AgemarkerCore::AgemarkerCore(Data::CalculationInput input)
+AgemarkerCore::AgemarkerCore(Data::CalculationInput input,
+                             Data::CalculationResultOptions options)
 {
     qRegisterMetaType<Data::Types::IpValuesMap>("Data::Types::IpValuesMap");
     qRegisterMetaType<Data::Types::StatisticalUInt64>("Data::Types::StatisticalUInt64");
     qRegisterMetaType<Data::Types::StatisticalFloat>("Data::Types::StatisticalFloat");
     this->data = input;
+    this->resultOptions = options;
     this->runningThreads = input.threadsNumber;
 }
 
