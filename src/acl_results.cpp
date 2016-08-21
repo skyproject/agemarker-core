@@ -11,10 +11,11 @@
 
 using namespace ACL;
 
-Results::Results(Data::CalculationInput inputData, Data::Structs::CalculationAtomData atomData,
-                 Data::Types::IpValuesMap ipValues)
+Results::Results(Data::CalculationInput inputData, Data::CalculationResultOptions resultOptions,
+                 Data::Structs::CalculationAtomData atomData, Data::Types::IpValuesMap ipValues)
 {
     this->data = inputData;
+    this->options = resultOptions;
     this->atoms = atomData;
     this->numberOfIpValues = ipValues.size();
     this->calculatedIp = ipValues;
@@ -22,7 +23,6 @@ Results::Results(Data::CalculationInput inputData, Data::Structs::CalculationAto
 
 Results::~Results()
 {
-
 }
 
 Data::CalculationResult Results::getCalculationResults()
@@ -30,6 +30,7 @@ Data::CalculationResult Results::getCalculationResults()
     Data::CalculationResult r;
 
     r.calculationInput = this->data;
+    r.resultOptions = this->options;
 
     r.atoms = this->atoms.allEight;
     r.atomsSum = this->atoms.allEightSum;
@@ -42,7 +43,10 @@ Data::CalculationResult Results::getCalculationResults()
         r.ipFrequency.push_back(iter->second);
     }
 
-    r.ipTheoreticalFrequency = calculateTheoreticalIpValues(r.ipFrequency);
+    if (this->options.includeApproximateFrequencies)
+    {
+        r.ipApproximateFrequency = calculateApproximateIpFrequency(r.ipFrequency);
+    }
 
     if (this->numberOfIpValues > 0)
     {
@@ -73,7 +77,7 @@ Data::CalculationResult Results::getCalculationResults()
     return r;
 }
 
-std::vector<uint64_t> Results::calculateTheoreticalIpValues(std::vector<uint64_t> ipFrequency)
+std::vector<uint64_t> Results::calculateApproximateIpFrequency(std::vector<uint64_t> ipFrequency)
 {
     std::vector<uint64_t>::const_iterator minCount = std::min_element(std::begin(ipFrequency),
                                                                       std::end(ipFrequency));
@@ -90,8 +94,8 @@ std::vector<uint64_t> Results::calculateTheoreticalIpValues(std::vector<uint64_t
 
 Data::CalculationResult Results::calculateStatistics(ACL::Data::CalculationResult r)
 {
-    uint64_t atomAllSumPopulation = std::accumulate(r.ipTheoreticalFrequency.begin(),
-                                                    r.ipTheoreticalFrequency.end(), 0);
+    uint64_t atomAllSumPopulation = std::accumulate(r.ipApproximateFrequency.begin(),
+                                                    r.ipApproximateFrequency.end(), 0);
 
     Data::Types::StatisticalFloat ipSum;
     Data::Types::StatisticalFloat ipSqrtSum;
@@ -99,54 +103,59 @@ Data::CalculationResult Results::calculateStatistics(ACL::Data::CalculationResul
     for (int x = 0; x < this->numberOfIpValues; ++x)
     {
         ipSum.sample += (r.ip[x] * r.ipFrequency[x]);
-        ipSum.population += (r.ip[x] * r.ipTheoreticalFrequency[x]);
         ipSqrtSum.sample += (r.ipSqrt[x] * r.ipFrequency[x]);
-        ipSqrtSum.population += (r.ipSqrt[x] * r.ipTheoreticalFrequency[x]);
+
+        if (this->options.includeApproximateValues)
+        {
+            ipSum.population += (r.ip[x] * r.ipApproximateFrequency[x]);
+            ipSqrtSum.population += (r.ipSqrt[x] * r.ipApproximateFrequency[x]);
+        }
     }
 
     r.ipAverage.sample = (ipSum.sample / this->atoms.allSum);
-    r.ipAverage.population = (ipSum.population / atomAllSumPopulation);
-
     r.ipSqrtAverage.sample = (ipSqrtSum.sample / this->atoms.allSum);
-    r.ipSqrtAverage.population = (ipSqrtSum.population / atomAllSumPopulation);
+
+    if (this->options.includeApproximateValues)
+    {
+        r.ipAverage.population = (ipSum.population / atomAllSumPopulation);
+        r.ipSqrtAverage.population = (ipSqrtSum.population / atomAllSumPopulation);
+    }
 
     for (int x = 0; x < this->numberOfIpValues; ++x)
     {
         r.ipSqrtVariance.sample += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 2) * r.ipFrequency[x]);
-        r.ipSqrtVariance.population += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 2) * r.ipTheoreticalFrequency[x]);
-
         r.ipVariance.sample += (FMath::pow((r.ip[x] - r.ipAverage.sample), 2) * r.ipFrequency[x]);
-        r.ipVariance.population += (FMath::pow((r.ip[x] - r.ipAverage.population), 2) * r.ipTheoreticalFrequency[x]);
-
         r.ipSqrtSkewnessOfDataset.sample += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 3) * r.ipFrequency[x]);
-        r.ipSqrtSkewnessOfDataset.population += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 3) * r.ipTheoreticalFrequency[x]);
-
         r.ipSkewnessOfDataset.sample += (FMath::pow((r.ip[x] - r.ipAverage.sample), 3) * r.ipFrequency[x]);
-        r.ipSkewnessOfDataset.population += (FMath::pow((r.ip[x] - r.ipAverage.population), 3) * r.ipTheoreticalFrequency[x]);
-
         r.ipSqrtExcessKurtosisOfDataset.sample += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.sample), 4) * r.ipFrequency[x]);
-        r.ipSqrtExcessKurtosisOfDataset.population += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 4) * r.ipTheoreticalFrequency[x]);
-
         r.ipExcessKurtosisOfDataset.sample += (FMath::pow((r.ip[x] - r.ipAverage.sample), 4) * r.ipFrequency[x]);
-        r.ipExcessKurtosisOfDataset.population += (FMath::pow((r.ip[x] - r.ipAverage.population), 4) * r.ipTheoreticalFrequency[x]);
+
+        if (this->options.includeApproximateValues)
+        {
+            r.ipSqrtVariance.population += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 2) * r.ipApproximateFrequency[x]);
+            r.ipVariance.population += (FMath::pow((r.ip[x] - r.ipAverage.population), 2) * r.ipApproximateFrequency[x]);
+            r.ipSqrtSkewnessOfDataset.population += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 3) * r.ipApproximateFrequency[x]);
+            r.ipSkewnessOfDataset.population += (FMath::pow((r.ip[x] - r.ipAverage.population), 3) * r.ipApproximateFrequency[x]);
+            r.ipSqrtExcessKurtosisOfDataset.population += (FMath::pow((r.ipSqrt[x] - r.ipSqrtAverage.population), 4) * r.ipApproximateFrequency[x]);
+            r.ipExcessKurtosisOfDataset.population += (FMath::pow((r.ip[x] - r.ipAverage.population), 4) * r.ipApproximateFrequency[x]);
+        }
     }
 
     r.ipSqrtVariance.sample = (r.ipSqrtVariance.sample / (this->atoms.allSum - 1));
-    r.ipSqrtVariance.population = (r.ipSqrtVariance.population / atomAllSumPopulation);
-
     r.ipVariance.sample = (r.ipVariance.sample / (this->atoms.allSum - 1));
-    r.ipVariance.population = (r.ipVariance.population / atomAllSumPopulation);
-
     r.ipSqrtStandardDeviation.sample = FMath::sqrt(r.ipSqrtVariance.sample);
-    r.ipSqrtStandardDeviation.population = FMath::sqrt(r.ipSqrtVariance.population);
-
     r.ipStandardDeviation.sample = FMath::sqrt(r.ipVariance.sample);
-    r.ipStandardDeviation.population = FMath::sqrt(r.ipVariance.population);
+
+    if (this->options.includeApproximateValues)
+    {
+        r.ipSqrtVariance.population = (r.ipSqrtVariance.population / atomAllSumPopulation);
+        r.ipVariance.population = (r.ipVariance.population / atomAllSumPopulation);
+        r.ipSqrtStandardDeviation.population = FMath::sqrt(r.ipSqrtVariance.population);
+        r.ipStandardDeviation.population = FMath::sqrt(r.ipVariance.population);
+    }
 
     r = calculateSkewnessOfDataset(r);
     r = calculateExcessKurtosis(r);
-
-    /* Mean square error */
 
     r.ipSqrtMeanSquareError = (r.ipSqrtVariance.sample / this->atoms.allSum);
     r.ipMeanSquareError = (r.ipVariance.sample / this->atoms.allSum);
@@ -190,7 +199,10 @@ Data::CalculationResult Results::calculateIntervals(ACL::Data::CalculationResult
             if (r.ip[x] <= r.ipIntervalMaximum[y])
             {
                 r.ipIntervalCount[y].sample += r.ipFrequency[x];
-                r.ipIntervalCount[y].population += r.ipTheoreticalFrequency[x];
+                if (this->options.includeApproximateValues)
+                {
+                    r.ipIntervalCount[y].population += r.ipApproximateFrequency[x];
+                }
                 break;
             }
         }
@@ -199,7 +211,10 @@ Data::CalculationResult Results::calculateIntervals(ACL::Data::CalculationResult
             if (r.ipSqrt[x] <= r.ipSqrtIntervalMaximum[y])
             {
                 r.ipSqrtIntervalCount[y].sample += r.ipFrequency[x];
-                r.ipSqrtIntervalCount[y].population += r.ipTheoreticalFrequency[x];
+                if (this->options.includeApproximateValues)
+                {
+                    r.ipSqrtIntervalCount[y].population += r.ipApproximateFrequency[x];
+                }
                 break;
             }
         }
@@ -210,8 +225,8 @@ Data::CalculationResult Results::calculateIntervals(ACL::Data::CalculationResult
 
 Data::CalculationResult Results::calculateSkewnessOfDataset(Data::CalculationResult r)
 {
-    uint64_t atomAllSumPopulation = std::accumulate(r.ipTheoreticalFrequency.begin(),
-                                                    r.ipTheoreticalFrequency.end(), 0);
+    uint64_t atomAllSumPopulation = std::accumulate(r.ipApproximateFrequency.begin(),
+                                                    r.ipApproximateFrequency.end(), 0);
 
     r.ipSqrtSkewnessOfDataset.sample = (r.ipSqrtSkewnessOfDataset.sample / (FMath::pow(r.ipSqrtStandardDeviation.sample, 3)));
     r.ipSkewnessOfDataset.sample = (r.ipSkewnessOfDataset.sample / (FMath::pow(r.ipStandardDeviation.sample, 3)));
@@ -220,18 +235,21 @@ Data::CalculationResult Results::calculateSkewnessOfDataset(Data::CalculationRes
     r.ipSqrtSkewnessOfDataset.sample = (r.ipSqrtSkewnessOfDataset.sample * fraction);
     r.ipSkewnessOfDataset.sample = (r.ipSkewnessOfDataset.sample * fraction);
 
-    r.ipSqrtSkewnessOfDataset.population = (r.ipSqrtSkewnessOfDataset.population / (FMath::pow(r.ipSqrtStandardDeviation.population, 3)));
-    r.ipSkewnessOfDataset.population = (r.ipSkewnessOfDataset.population / (FMath::pow(r.ipStandardDeviation.population, 3)));
-    r.ipSqrtSkewnessOfDataset.population = (r.ipSqrtSkewnessOfDataset.population / atomAllSumPopulation);
-    r.ipSkewnessOfDataset.population = (r.ipSkewnessOfDataset.population / atomAllSumPopulation);
+    if (this->options.includeApproximateValues)
+    {
+        r.ipSqrtSkewnessOfDataset.population = (r.ipSqrtSkewnessOfDataset.population / (FMath::pow(r.ipSqrtStandardDeviation.population, 3)));
+        r.ipSkewnessOfDataset.population = (r.ipSkewnessOfDataset.population / (FMath::pow(r.ipStandardDeviation.population, 3)));
+        r.ipSqrtSkewnessOfDataset.population = (r.ipSqrtSkewnessOfDataset.population / atomAllSumPopulation);
+        r.ipSkewnessOfDataset.population = (r.ipSkewnessOfDataset.population / atomAllSumPopulation);
+    }
 
     return r;
 }
 
 Data::CalculationResult Results::calculateExcessKurtosis(Data::CalculationResult r)
 {
-    uint64_t atomAllSumPopulation = std::accumulate(r.ipTheoreticalFrequency.begin(),
-                                                    r.ipTheoreticalFrequency.end(), 0);
+    uint64_t atomAllSumPopulation = std::accumulate(r.ipApproximateFrequency.begin(),
+                                                    r.ipApproximateFrequency.end(), 0);
 
     r.ipSqrtExcessKurtosisOfDataset.sample = (r.ipSqrtExcessKurtosisOfDataset.sample / (FMath::pow(r.ipSqrtStandardDeviation.sample, 4)));
     r.ipExcessKurtosisOfDataset.sample = (r.ipExcessKurtosisOfDataset.sample / (FMath::pow(r.ipStandardDeviation.sample, 4)));
@@ -260,12 +278,15 @@ Data::CalculationResult Results::calculateExcessKurtosis(Data::CalculationResult
     r.ipSqrtExcessKurtosisOfDataset.sample = (r.ipSqrtExcessKurtosisOfDataset.sample - fraction);
     r.ipExcessKurtosisOfDataset.sample = (r.ipExcessKurtosisOfDataset.sample - fraction);
 
-    r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population / (FMath::pow(r.ipSqrtStandardDeviation.population, 4)));
-    r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population / (FMath::pow(r.ipStandardDeviation.population, 4)));
-    r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population / atomAllSumPopulation);
-    r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population / atomAllSumPopulation);
-    r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population - 3);
-    r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population - 3);
+    if (this->options.includeApproximateValues)
+    {
+        r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population / (FMath::pow(r.ipSqrtStandardDeviation.population, 4)));
+        r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population / (FMath::pow(r.ipStandardDeviation.population, 4)));
+        r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population / atomAllSumPopulation);
+        r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population / atomAllSumPopulation);
+        r.ipSqrtExcessKurtosisOfDataset.population = (r.ipSqrtExcessKurtosisOfDataset.population - 3);
+        r.ipExcessKurtosisOfDataset.population = (r.ipExcessKurtosisOfDataset.population - 3);
+    }
 
     return r;
 }

@@ -145,7 +145,7 @@ void AgemarkerCore::collectThreadResult(Data::Types::IpValuesMap result)
         {
             delete this->threads[x];
         }
-        Results r(this->data, this->atoms, this->calculatedIp);
+        Results r(this->data, this->resultOptions, this->atoms, this->calculatedIp);
         emit calculationFinished(r.getCalculationResults());
     }
 }

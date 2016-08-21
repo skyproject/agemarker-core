@@ -20,8 +20,8 @@ namespace ACL
             Q_OBJECT
 
         public:
-            Results(Data::CalculationInput inputData, Data::Structs::CalculationAtomData atomData,
-                    Data::Types::IpValuesMap ipValues);
+            Results(Data::CalculationInput inputData, Data::CalculationResultOptions resultOptions,
+                    Data::Structs::CalculationAtomData atomData, Data::Types::IpValuesMap ipValues);
             ~Results();
             Data::CalculationResult getCalculationResults();
 
@@ -30,9 +30,9 @@ namespace ACL
             Data::CalculationResult calculateIntervals(Data::CalculationResult r);
             Data::CalculationResult calculateSkewnessOfDataset(Data::CalculationResult r);
             Data::CalculationResult calculateExcessKurtosis(Data::CalculationResult r);
-
-            std::vector<uint64_t> calculateTheoreticalIpValues(std::vector<uint64_t> ipFrequency);
+            std::vector<uint64_t> calculateApproximateIpFrequency(std::vector<uint64_t> ipFrequency);
             Data::CalculationInput data;
+            Data::CalculationResultOptions options;
             Data::Structs::CalculationAtomData atoms;
             Data::Types::IpValuesMap calculatedIp;
             int numberOfIpValues;

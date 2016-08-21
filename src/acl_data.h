@@ -217,11 +217,12 @@ namespace ACL
         struct CalculationResult
         {
             CalculationInput calculationInput;
+            CalculationResultOptions resultOptions;
             std::vector<uint64_t> atoms;
             std::vector<Float> ip;
             std::vector<Float> ipSqrt;
             std::vector<uint64_t> ipFrequency;
-            std::vector<uint64_t> ipTheoreticalFrequency;
+            std::vector<uint64_t> ipApproximateFrequency;
             uint64_t atomsSum;
             Types::StatisticalFloat ipAverage;
             Types::StatisticalFloat ipSqrtAverage;
