@@ -69,24 +69,24 @@ Data::CalculationResult Results::getCalculationResults()
             r.ipSqrtIntervalMinimum.push_back(0);
             r.ipSqrtIntervalMaximum.push_back(0);
             r.ipSqrtIntervalCenter.push_back(0);
-            r.ipIntervalCount.push_back(Data::Types::StatisticalUInt64(0, 0));
-            r.ipSqrtIntervalCount.push_back(Data::Types::StatisticalUInt64(0, 0));
+            r.ipIntervalCount.push_back(Data::Types::StatisticalFloat(0, 0));
+            r.ipSqrtIntervalCount.push_back(Data::Types::StatisticalFloat(0, 0));
         }
     }
 
     return r;
 }
 
-std::vector<uint64_t> Results::calculateApproximateIpFrequency(std::vector<uint64_t> ipFrequency)
+std::vector<Float> Results::calculateApproximateIpFrequency(std::vector<uint64_t> ipFrequency)
 {
     std::vector<uint64_t>::const_iterator minCount = std::min_element(std::begin(ipFrequency),
                                                                       std::end(ipFrequency));
 
-    std::vector<uint64_t> out;
+    std::vector<Float> out;
     for (std::vector<uint64_t>::const_iterator iter = ipFrequency.begin();
          iter != ipFrequency.end(); ++iter)
     {
-        out.push_back(std::round((double)*iter / (double)*minCount));
+        out.push_back((double)*iter / (double)*minCount);
     }
 
     return out;
@@ -189,8 +189,8 @@ Data::CalculationResult Results::calculateIntervals(ACL::Data::CalculationResult
         r.ipIntervalCenter.push_back((r.ipIntervalMinimum[x] + r.ipIntervalMaximum[x]) / 2);
         r.ipSqrtIntervalCenter.push_back((r.ipSqrtIntervalMinimum[x] + r.ipSqrtIntervalMaximum[x]) / 2);
 
-        r.ipIntervalCount.push_back(Data::Types::StatisticalUInt64(0, 0));
-        r.ipSqrtIntervalCount.push_back(Data::Types::StatisticalUInt64(0, 0));
+        r.ipIntervalCount.push_back(Data::Types::StatisticalFloat(0, 0));
+        r.ipSqrtIntervalCount.push_back(Data::Types::StatisticalFloat(0, 0));
     }
     for (int x = 0; x < this->numberOfIpValues; ++x)
     {

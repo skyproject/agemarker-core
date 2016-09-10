@@ -72,9 +72,10 @@ namespace ACL
             {
                 return QLocale::system().toDouble(source);
             }
-            static QString toStr(double v, int precision)
+            static QString toStr(double v, int precision, bool fixed = false)
             {
                 std::ostringstream s;
+                if (fixed) s << std::fixed;
                 s << std::setprecision(precision) << v;
                 return QString::fromStdString(s.str());
             }
@@ -120,9 +121,10 @@ namespace ACL
             {
                 return boost::numeric_cast<float128>(source.toStdString());
             }
-            static QString toStr(float128 v, int precision)
+            static QString toStr(float128 v, int precision, bool fixed = false)
             {
                 std::ostringstream s;
+                if (fixed) s << std::fixed;
                 s << std::setprecision(precision) << v;
                 return QString::fromStdString(s.str());
             }

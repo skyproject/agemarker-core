@@ -30,7 +30,7 @@ namespace ACL
             Data::CalculationResult calculateIntervals(Data::CalculationResult r);
             Data::CalculationResult calculateSkewnessOfDataset(Data::CalculationResult r);
             Data::CalculationResult calculateExcessKurtosis(Data::CalculationResult r);
-            std::vector<uint64_t> calculateApproximateIpFrequency(std::vector<uint64_t> ipFrequency);
+            std::vector<Float> calculateApproximateIpFrequency(std::vector<uint64_t> ipFrequency);
             Data::CalculationInput data;
             Data::CalculationResultOptions options;
             Data::Structs::CalculationAtomData atoms;

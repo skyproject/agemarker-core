@@ -138,6 +138,7 @@ void AgemarkerCore::collectThreadResult(Data::Types::IpValuesMap result)
             this->calculatedIp.insert(std::pair<Float, uint64_t> (iter->first, iter->second));
         }
     }
+
     this->runningThreads--;
     if (this->runningThreads == 0)
     {

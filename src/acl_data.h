@@ -222,7 +222,7 @@ namespace ACL
             std::vector<Float> ip;
             std::vector<Float> ipSqrt;
             std::vector<uint64_t> ipFrequency;
-            std::vector<uint64_t> ipApproximateFrequency;
+            std::vector<Float> ipApproximateFrequency;
             uint64_t atomsSum;
             Types::StatisticalFloat ipAverage;
             Types::StatisticalFloat ipSqrtAverage;
@@ -246,8 +246,8 @@ namespace ACL
             std::vector<Float> ipSqrtIntervalMaximum;
             std::vector<Float> ipIntervalCenter;
             std::vector<Float> ipSqrtIntervalCenter;
-            std::vector<Types::StatisticalUInt64> ipIntervalCount;
-            std::vector<Types::StatisticalUInt64> ipSqrtIntervalCount;
+            std::vector<Types::StatisticalFloat> ipIntervalCount;
+            std::vector<Types::StatisticalFloat> ipSqrtIntervalCount;
         };
     }
 }
