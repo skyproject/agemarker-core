@@ -86,7 +86,7 @@ std::vector<Float> Results::calculateApproximateIpFrequency(std::vector<uint64_t
     for (std::vector<uint64_t>::const_iterator iter = ipFrequency.begin();
          iter != ipFrequency.end(); ++iter)
     {
-        out.push_back((double)*iter / (double)*minCount);
+        out.push_back((Float)*iter / (Float)*minCount);
     }
 
     return out;
@@ -94,8 +94,8 @@ std::vector<Float> Results::calculateApproximateIpFrequency(std::vector<uint64_t
 
 Data::CalculationResult Results::calculateStatistics(ACL::Data::CalculationResult r)
 {
-    uint64_t atomAllSumPopulation = std::accumulate(r.ipApproximateFrequency.begin(),
-                                                    r.ipApproximateFrequency.end(), 0);
+    Float atomAllSumPopulation = this->options.includeApproximateValues ? std::accumulate(r.ipApproximateFrequency.begin(), r.ipApproximateFrequency.end(), (Float) 0.0)
+                                                                        : 0.0;
 
     Data::Types::StatisticalFloat ipSum;
     Data::Types::StatisticalFloat ipSqrtSum;
