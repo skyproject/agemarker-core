@@ -107,8 +107,8 @@ Data::CalculationResult Results::calculateStatistics(ACL::Data::CalculationResul
 
         if (this->options.includeApproximateValues)
         {
-            ipSum.population += (r.ip[x] * r.ipApproximateFrequency[x]);
-            ipSqrtSum.population += (r.ipSqrt[x] * r.ipApproximateFrequency[x]);
+            ipSum.population += FMath::round(r.ip[x] * r.ipApproximateFrequency[x], this->options.approximateFrequencyPrecision);
+            ipSqrtSum.population += FMath::round(r.ipSqrt[x] * r.ipApproximateFrequency[x], this->options.approximateFrequencyPrecision);
         }
     }
 
